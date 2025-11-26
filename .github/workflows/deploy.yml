@@ -25,6 +25,7 @@ jobs:
           host: 65.0.71.42
 
           username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           script: |
 
