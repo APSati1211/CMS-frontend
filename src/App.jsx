@@ -7,8 +7,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ServiceDetail from "./pages/ServiceDetail";
 
-// 📄 Pages
-import Home from "./pages/Home";
+// 📄 Pages added pages
+import Home from "./pages/Home"; 
 import About from "./pages/About";
 import Services from "./pages/Services";  
 import Contact from "./pages/Contact";
