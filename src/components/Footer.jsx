@@ -1,11 +1,27 @@
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Linkedin, Instagram, ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 
-// Props mein 'logo' receive kiya
 export default function Footer({ logo }) {
   const currentYear = new Date().getFullYear();
 
+  const companyLinks = [
+    { name: "About Us", path: "/about" },
+    { name: "Careers", path: "/careers" },
+    { name: "Blog", path: "/blog" },
+    { name: "Privacy Policy", path: "/privacy-policy" },
+    { name: "Terms of Service", path: "/terms-and-conditions" },
+  ];
+
+  const serviceLinks = [
+    { name: "Virtual CFO", path: "/services/virtual-cfo" },
+    { name: "Audit & Assurance", path: "/services/audit-assurance" },
+    { name: "Taxation Services", path: "/services/taxation-services" },
+    { name: "Financial Analytics", path: "/services/financial-analytics" },
+    { name: "Risk Management", path: "/services/risk-management" },
+  ];
+
   return (
+    // Fixed "Old Look" - Slate 950 Background
     <footer className="bg-slate-950 text-slate-300 border-t border-white/5 relative overflow-hidden">
       
       {/* Background Decorative Elements */}
@@ -17,12 +33,11 @@ export default function Footer({ logo }) {
           
           {/* Column 1: Brand Info */}
           <div className="space-y-6">
-            
-            {/* DYNAMIC LOGO HERE */}
             {logo ? (
               <img src={logo} alt="XpertAI Global" className="h-12 mb-4 object-contain" />
             ) : (
               <h2 className="text-3xl font-extrabold text-white tracking-tight">
+                {/* Fixed Blue Accent */}
                 XpertAI <span className="text-blue-500">Global</span>
               </h2>
             )}
@@ -43,11 +58,11 @@ export default function Footer({ logo }) {
           <div>
             <h3 className="text-white font-bold text-lg mb-6">Company</h3>
             <ul className="space-y-4">
-              {['About Us', 'Careers', 'Blog', 'Privacy Policy', 'Terms of Service'].map((item) => (
-                <li key={item}>
-                  <Link to="/" className="hover:text-blue-400 transition-colors flex items-center gap-1 group text-sm">
+              {companyLinks.map((item) => (
+                <li key={item.name}>
+                  <Link to={item.path} className="hover:text-blue-400 transition-colors flex items-center gap-1 group text-sm">
                     <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {item}
+                    {item.name}
                   </Link>
                 </li>
               ))}
@@ -58,11 +73,13 @@ export default function Footer({ logo }) {
           <div>
             <h3 className="text-white font-bold text-lg mb-6">Services</h3>
             <ul className="space-y-4 text-sm">
-              <li><Link to="/services/virtual-cfo" className="hover:text-blue-400 transition">Virtual CFO</Link></li>
-              <li><Link to="/services/audit-assurance" className="hover:text-blue-400 transition">Audit & Assurance</Link></li>
-              <li><Link to="/services/taxation-services" className="hover:text-blue-400 transition">Taxation Services</Link></li>
-              <li><Link to="/services" className="hover:text-blue-400 transition">Financial Analytics</Link></li>
-              <li><Link to="/services" className="hover:text-blue-400 transition">Risk Management</Link></li>
+              {serviceLinks.map((service) => (
+                <li key={service.name}>
+                  <Link to={service.path} className="hover:text-blue-400 transition">
+                    {service.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -80,7 +97,7 @@ export default function Footer({ logo }) {
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={18} className="text-blue-500 shrink-0" />
-                <p>+91 98765 43210</p>
+                <a href="tel:+919876543210" className="hover:text-white transition">+91 98765 43210</a>
               </div>
             </div>
 
@@ -102,7 +119,7 @@ export default function Footer({ logo }) {
 
         </div>
 
-        {/* Bottom Strip - UPDATED HERE */}
+        {/* Bottom Strip */}
         <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
           <p>&copy; {currentYear} XpertAI Global. All rights reserved.</p>
           <p>Developed by <span className="text-blue-500 font-bold hover:text-blue-400 transition cursor-pointer">WebArclight</span></p>

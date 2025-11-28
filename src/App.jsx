@@ -2,10 +2,9 @@ import { motion } from "framer-motion";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
-import { ArrowRight } from "lucide-react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
-import ServiceDetail from "./pages/ServiceDetail";
+import { getThemeSettings } from "./api"; // Updated import
 
 // 📄 Pages
 import Home from "./pages/Home";
@@ -13,28 +12,27 @@ import About from "./pages/About";
 import Services from "./pages/Services";  
 import Contact from "./pages/Contact";
 import Stakeholders from "./pages/Stakeholders";
-import Features from "./pages/Features";
+// Features page removed
 import LeadSystem from "./pages/LeadSystem";
 import Blog from "./pages/Blog";
 import Resources from "./pages/Resources";
 import Careers from "./pages/Careers";
+import ServiceDetail from "./pages/ServiceDetail";
 
 function App() {
-  const [themeData, setThemeData] = useState(null); // Store full theme object
+  const [themeData, setThemeData] = useState(null);
 
   useEffect(() => {
-    fetch("/api/theme-settings/")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data) {
-            setThemeData(data); // Store all data for usage in components
-
-            // CSS Variables
-            document.documentElement.style.setProperty('--primary-color', data.primary_color);
-            document.documentElement.style.setProperty('--secondary-color', data.secondary_color);
-            document.documentElement.style.setProperty('--accent-color', data.accent_color);
-            document.documentElement.style.setProperty('--background-color', data.background_color);
-            document.documentElement.style.setProperty('--text-color', data.text_color);
+    getThemeSettings()
+      .then((res) => {
+        if (res.data) {
+            setThemeData(res.data);
+            // CSS Variables update
+            document.documentElement.style.setProperty('--primary-color', res.data.primary_color);
+            document.documentElement.style.setProperty('--secondary-color', res.data.secondary_color);
+            document.documentElement.style.setProperty('--accent-color', res.data.accent_color);
+            document.documentElement.style.setProperty('--background-color', res.data.background_color);
+            document.documentElement.style.setProperty('--text-color', res.data.text_color);
             
             document.body.classList.remove("dark");
         }
@@ -45,17 +43,19 @@ function App() {
   return (
     <Router>
       <div className="bg-light min-h-screen flex flex-col">
-        {/* 🔹 Navbar: Passes Logo */}
+        {/* Navbar */}
         <Navbar logo={themeData?.logo} />
 
-        {/* 🔹 Routes */}
+        {/* Routes */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/stakeholders" element={<Stakeholders />} />
-          <Route path="/features" element={<Features />} />
+          
+          {/* Features Route Removed */}
+          
           <Route path="/lead-system" element={<LeadSystem />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/resources" element={<Resources />} />
@@ -63,11 +63,11 @@ function App() {
           <Route path="/services/:slug" element={<ServiceDetail />} />
         </Routes>
 
-        {/* 🔹 Footer: Passes Social Links & Contact Info */}
-        <Footer data={themeData} logo={themeData?.logo} />
+        {/* Footer */}
+        <Footer logo={themeData?.logo} />
         
-        {/* 🔹 Chatbot: Passes Welcome Message */}
-        <Chatbot welcomeMessage={themeData?.chatbot_welcome_message} />
+        {/* Chatbot */}
+        <Chatbot />
       </div>
     </Router>
   );

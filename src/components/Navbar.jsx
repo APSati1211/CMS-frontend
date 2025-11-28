@@ -16,7 +16,7 @@ export default function Navbar({ logo }) {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
 
-    // Fetch dynamic pages for dropdown
+    // Fetch dynamic pages
     axios.get("http://127.0.0.1:8000/api/pages/")
       .then(res => setDynamicPages(res.data))
       .catch(err => console.error("Menu fetch error", err));
@@ -24,17 +24,16 @@ export default function Navbar({ logo }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // --- Body Lock & Header Color Logic ---
+  // --- Body Lock ---
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"; // Scroll Lock
+      document.body.style.overflow = "hidden"; 
     } else {
       document.body.style.overflow = "auto";
     }
     return () => { document.body.style.overflow = "auto"; };
   }, [isOpen]);
 
-  // Links Configuration
   const mainLinks = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
@@ -45,7 +44,6 @@ export default function Navbar({ logo }) {
 
   const dropdownLinks = [
     { name: "Stakeholders", path: "/stakeholders" },
-    { name: "Features", path: "/features" },
     { name: "Blog", path: "/blog" },
     { name: "Lead System", path: "/lead-system" },
     ...dynamicPages.map(page => ({ name: page.title, path: `/${page.slug}` }))
@@ -53,20 +51,17 @@ export default function Navbar({ logo }) {
 
   return (
     <>
-      {/* 🔹 NAVBAR HEADER 
-          - Z-Index 60 rakha hai taaki ye Mobile Menu (Z-50) ke upar rahe.
-          - isOpen hone par bg-slate-900 (Banner Color) force kiya hai.
-      */}
+      {/* 🔹 NAVBAR HEADER (Fixed "Old Look" - Slate 900) */}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, type: "spring" }}
         className={`fixed top-0 w-full z-[60] transition-all duration-300 border-b border-transparent ${
           isOpen 
-            ? "bg-slate-900 border-white/10"  // Menu Open: Solid Dark Color (Matches Banner)
+            ? "bg-slate-900 border-white/10" 
             : scrolled 
-              ? "bg-slate-900/90 backdrop-blur-xl border-white/10 shadow-2xl py-3" // Scrolled: Glass Dark
-              : "bg-transparent py-5" // Top: Transparent
+              ? "bg-slate-900/90 backdrop-blur-xl border-white/10 shadow-2xl py-3" 
+              : "bg-transparent py-5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -85,6 +80,7 @@ export default function Navbar({ logo }) {
                 whileHover={{ scale: 1.05 }}
                 className="text-2xl font-extrabold tracking-tighter flex items-center gap-2"
               >
+                {/* Fixed Gradient Text */}
                 <span className="bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text drop-shadow-lg">
                   XpertAI
                 </span>
@@ -93,7 +89,7 @@ export default function Navbar({ logo }) {
             )}
           </Link>
 
-          {/* DESKTOP MENU (Hidden on Mobile) */}
+          {/* DESKTOP MENU */}
           <div className="hidden md:flex items-center gap-8">
             {mainLinks.map((link) => (
               <Link 
@@ -155,6 +151,7 @@ export default function Navbar({ logo }) {
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0px 0px 25px rgba(59, 130, 246, 0.6)" }}
                 whileTap={{ scale: 0.95 }}
+                // Fixed Gradient Button
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-bold text-sm border border-white/20 shadow-lg ml-2"
               >
                 Get Started
@@ -162,9 +159,7 @@ export default function Navbar({ logo }) {
             </Link>
           </div>
 
-          {/* 🔹 MOBILE TOGGLE BUTTON (CLOSE/OPEN)
-              - Ye ab Navbar ke andar hi hai (Z-60), toh hamesha visible rahega.
-          */}
+          {/* MOBILE TOGGLE BUTTON */}
           <button 
             className="md:hidden text-white p-2 relative focus:outline-none hover:bg-white/10 rounded-lg transition-colors"
             onClick={() => setIsOpen(!isOpen)}
@@ -175,10 +170,7 @@ export default function Navbar({ logo }) {
         </div>
       </motion.nav>
 
-      {/* 🔹 MOBILE MENU OVERLAY 
-          - Iska Z-Index 50 hai (Navbar ke neeche).
-          - Top padding di hai taaki content header ke neeche se start ho.
-      */}
+      {/* 🔹 MOBILE MENU OVERLAY (Fixed "Old Look" Colors) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -191,7 +183,6 @@ export default function Navbar({ logo }) {
             <div className="flex flex-col space-y-2 pb-10">
               <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Menu</div>
               
-              {/* Main Links */}
               {[...mainLinks, ...dropdownLinks].map((link, idx) => (
                 <motion.div
                   key={link.name}
@@ -214,7 +205,6 @@ export default function Navbar({ logo }) {
                 </motion.div>
               ))}
 
-              {/* CTA in Mobile */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

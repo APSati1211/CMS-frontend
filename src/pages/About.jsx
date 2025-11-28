@@ -32,8 +32,12 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Hero */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-24 px-6 text-center relative overflow-hidden">
+      
+      {/* Hero Section 
+          - pt-32: Added top padding for Fixed Navbar.
+          - pb-20: Bottom padding for internal spacing.
+      */}
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white pt-32 pb-20 px-6 text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <motion.h1 
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} 
@@ -45,8 +49,11 @@ export default function About() {
         >{hero.text}</motion.p>
       </div>
 
-      {/* Mission/Vision Cards */}
-      <div className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-3 gap-8 -mt-20 relative z-20">
+      {/* Mission/Vision Cards 
+          - Removed '-mt-20' (negative margin) to stop overlap.
+          - Added 'mt-8' to create spacing between Banner and Cards.
+      */}
+      <div className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-3 gap-8 mt-8 relative z-20">
         {sections.map((section, index) => (
           <motion.div 
             key={index}

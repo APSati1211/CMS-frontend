@@ -3,24 +3,16 @@
 @tailwind utilities;
 
 :root {
-  /* Professional Corporate Theme (Deep Blue & Gold/Orange) */
-  --primary-color: #0f172a;   /* Dark Navy Blue */
-  --secondary-color: #3b82f6; /* Bright Blue */
-  --accent-color: #f59e0b;    /* Gold/Orange for CTA */
-  --background-color: #f8fafc; /* Very Light Grey */
-  --text-color: #334155;      /* Slate Grey */
+  /* Default Fallback Colors (Agar Admin Panel se data na load ho) */
+  --primary-color: #0f172a;   /* Slate 900 */
+  --secondary-color: #3b82f6; /* Blue 500 */
+  --accent-color: #f59e0b;    /* Amber 500 */
+  --background-color: #f8fafc; /* Slate 50 */
+  --text-color: #334155;      /* Slate 700 */
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Inter', sans-serif; /* Ensure you have a good font imported */
-}
-
-/* Custom Classes for Glassmorphism */
-.glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  font-family: 'Inter', sans-serif;
 }

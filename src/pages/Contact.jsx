@@ -2,37 +2,43 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, ArrowUpRight } from "lucide-react";
 import usePageContent from "../hooks/usePageContent";
-import { sendContact } from "../api";
+import { submitLead } from "../api";
 
 export default function Contact() {
   const { getField, loading } = usePageContent("contact");
-  const [form, setForm] = useState({ name: "", email: "", message: "", subject: "" });
-  const [status, setStatus] = useState(null); // null, sending, success, error
+  
+  const [form, setForm] = useState({ 
+    name: "", 
+    company: "", 
+    email: "", 
+    phone: "", 
+    service: "", 
+    message: "" 
+  });
+  
+  const [status, setStatus] = useState(null);
 
-  // --- DYNAMIC FORM TEXTS (Managed via CMS Admin) ---
-  const formTitle = getField("form_title", "title") || "Send a Direct Inquiry";
-  const formSubtext = getField("form_subtext") || "We typically respond to business inquiries within one business day.";
-  const buttonText = getField("form_button_text", "title") || "Submit Securely";
-  const successMessage = getField("form_success_msg") || "Message received! We will contact you within 24 hours.";
+  // --- DYNAMIC FORM TEXTS ---
+  const formTitle = getField("form_title", "title") || "Start Your Transformation";
+  const formSubtext = getField("form_subtext") || "Fill out the form below, and our team will get in touch with a tailored plan.";
+  const buttonText = getField("form_button_text", "title") || "Submit Request";
+  const successMessage = getField("form_success_msg") || "Thank you! Your request has been received. We will contact you shortly.";
   
   const contactInfo = {
     email: getField("email") || "support@xpertai.global",
     phone: getField("phone") || "+91 98765 43210",
     address: getField("address") || "123 Corporate Avenue, Mumbai, India",
-    mapLink: getField("map_link"),
-    mapButton: getField("map_button", "title") || "View on Map",
   };
-  // -----------------------
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
     try {
-      await sendContact(form); 
+      await submitLead({ ...form, source: "website" }); 
       setStatus("success");
-      setForm({ name: "", email: "", message: "", subject: "" });
-    } catch { 
+      setForm({ name: "", company: "", email: "", phone: "", service: "", message: "" });
+    } catch (error) { 
+      console.error("Lead submission error:", error);
       setStatus("error"); 
     }
   };
@@ -44,18 +50,22 @@ export default function Contact() {
   if (loading) return <div className="text-center py-20 text-2xl text-blue-600">Loading Content...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    // FIX: Removed 'pt-20' from here to remove the white gap at top
+    <div className="min-h-screen bg-gray-50">
       
-      {/* Hero Section */}
-      <div className="bg-slate-900 text-white py-24 text-center">
+      {/* Hero Section 
+          FIX: Added 'pt-32' (Padding Top) here inside the dark background.
+          Now the dark color goes behind the Navbar, but text starts lower down.
+      */}
+      <div className="bg-slate-900 text-white pt-32 pb-24 text-center px-6">
         <h1 className="text-5xl font-bold mb-3">{getField("contact_header", "title") || "Let's Talk Business"}</h1>
-        <p className="text-slate-400 text-lg">{getField("contact_subtext") || "We'd love to hear about your financial automation challenges."}</p>
+        <p className="text-slate-400 text-lg max-w-2xl mx-auto">{getField("contact_subtext") || "We'd love to hear about your financial automation challenges."}</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-6 py-16 -mt-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 bg-white rounded-3xl shadow-2xl overflow-hidden p-0">
 
-            {/* Column 1: Dynamic Info Panel */}
+            {/* Column 1: Info Panel */}
             <motion.div 
                 initial={{ opacity: 0, x: -30 }} 
                 animate={{ opacity: 1, x: 0 }} 
@@ -66,7 +76,6 @@ export default function Contact() {
                     <h3 className="text-3xl font-bold mb-4">{getField("info_title", "title") || "Contact Details"}</h3>
                     <p className="text-gray-300">{getField("info_text") || "Reach out for project collaborations or specific service inquiries."}</p>
 
-                    {/* Dynamic Contact Blocks */}
                     <div className="space-y-4 pt-4">
                         <div className="flex items-center gap-4">
                             <Mail size={20} className="text-yellow-400 shrink-0" />
@@ -83,7 +92,6 @@ export default function Contact() {
                     </div>
                 </div>
 
-                {/* Map Link (Dynamic) */}
                 {contactInfo.mapLink && (
                     <a 
                         href={contactInfo.mapLink} 
@@ -109,22 +117,49 @@ export default function Contact() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                     
                     <div className="grid md:grid-cols-2 gap-5">
-                        <input type="text" name="name" placeholder="Full Name" required className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" onChange={handleChange} value={form.name} />
-                        <input type="email" name="email" placeholder="Work Email" required className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" onChange={handleChange} value={form.email} />
+                        <input 
+                          type="text" name="name" placeholder="Full Name" required 
+                          className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" 
+                          onChange={handleChange} value={form.name} 
+                        />
+                        <input 
+                          type="text" name="company" placeholder="Company Name" 
+                          className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" 
+                          onChange={handleChange} value={form.company} 
+                        />
                     </div>
                     
-                    <input type="text" name="subject" placeholder="Subject (e.g., Virtual CFO Inquiry)" required className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" onChange={handleChange} value={form.subject} />
-
-                    <textarea rows="5" name="message" placeholder="Describe your requirement in detail..." required className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" onChange={handleChange} value={form.message}></textarea>
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <input 
+                          type="email" name="email" placeholder="Work Email" required 
+                          className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" 
+                          onChange={handleChange} value={form.email} 
+                        />
+                        <input 
+                          type="tel" name="phone" placeholder="Phone Number" required 
+                          className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" 
+                          onChange={handleChange} value={form.phone} 
+                        />
+                    </div>
                     
-                    {/* Dynamic Button Text */}
+                    <input 
+                      type="text" name="service" placeholder="Service of Interest (e.g. Virtual CFO, Audit)" 
+                      className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" 
+                      onChange={handleChange} value={form.service} 
+                    />
+
+                    <textarea 
+                      rows="5" name="message" placeholder="Tell us more about your requirements..." 
+                      className="w-full p-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 transition" 
+                      onChange={handleChange} value={form.message}
+                    ></textarea>
+                    
                     <button type="submit" disabled={status === "sending"} className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold hover:bg-blue-700 transition flex justify-center items-center gap-2 shadow-lg shadow-blue-500/30">
-                        {status === "sending" ? "Sending..." : <><Send size={18} /> {buttonText}</>}
+                        {status === "sending" ? "Submitting..." : <><Send size={18} /> {buttonText}</>}
                     </button>
                     
-                    {/* Display Dynamic Success Message */}
                     {status === "success" && <p className="text-green-600 font-semibold text-center mt-4">{successMessage}</p>}
-                    {status === "error" && <p className="text-red-600 font-semibold text-center mt-4">Submission failed. Please check your network.</p>}
+                    {status === "error" && <p className="text-red-600 font-semibold text-center mt-4">Submission failed. Please try again.</p>}
                 </form>
             </motion.div>
         </div>

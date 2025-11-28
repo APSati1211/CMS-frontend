@@ -1,0 +1,45 @@
+name: Deploy on AWS EC2 Frontend Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create SSH private key file
+        run: |
+          # write secret into a file and secure it it
+          echo "$SSH_PRIVATE_KEY" > ./private_key
+          chmod 600 ./private_key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: (optional) Show key header for debug (safe)
+        if: ${{ always() }}
+        run: |
+          echo "-----BEGIN KEY PREVIEW-----" 
+          head -n 3 ./private_key || true
+          echo "-----END KEY PREVIEW-----"
+
+      - name: Connect & Pull Latest Code
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 65.0.71.42
+          username: root
+          key_path: ./private_key
+          port: 22
+          timeout: 10m
+          script: |
+            curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+            apt-get install -y nodejs
+            npm install -g pnpm pm2
+            ls -la
+            cd XPertAIGlobal || true
+            git pull origin main
