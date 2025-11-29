@@ -18,7 +18,7 @@
     "swr": "^2.2.5",
     "web-vitals": "^2.1.4"
   },
-  "proxy": "http://127.0.0.1:8000",
+  "proxy": "http://15.206.207.118:8000",
   "scripts": {
     "start": "cross-env NODE_OPTIONS=--no-deprecation react-scripts start",
     "build": "react-scripts build",
