@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getPageContent } from "../api";
 
-const API_BASE_FALLBACK = "http://127.0.0.1:8000";
+const API_BASE_FALLBACK = "http://15.206.207.118:8000";
 
 export default function usePageContent(page) {
   const [content, setContent] = useState([]);
