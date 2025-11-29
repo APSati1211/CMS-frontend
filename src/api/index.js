@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Agar .env file me URL nahi hai, to default localhost use karega.
 // Agar tumhe live server (13.233...) use karna hai, to niche URL change kar lena.
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/api/";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://15.206.207.118:8000/api/";
 
 const API = axios.create({
     baseURL: BASE_URL, 
