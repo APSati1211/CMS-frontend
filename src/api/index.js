@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // --- CONFIGURATION ---
-const LOCAL_API_URL = "http://127.0.0.1:8000/api/";
+const LOCAL_API_URL = "/api";
 const BASE_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) 
     ? process.env.REACT_APP_API_URL 
     : LOCAL_API_URL;
