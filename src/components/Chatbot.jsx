@@ -1,20 +1,18 @@
-// src/components/Chatbot.jsx
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Bot, User, Send, MessageSquare, Loader } from 'lucide-react';
-// 👇 Import fixed API function
+import { Bot, User, Send, MessageSquare, Loader, RefreshCw } from 'lucide-react';
 import { chatFlowHandler } from '../api'; 
 import useThemeSettings from '../hooks/useThemeSettings'; 
 
 const Chatbot = () => {
-    const { settings, loading: settingsLoading } = useThemeSettings(); 
-    const welcomeMessage = settings?.chatbot_welcome_message || "Welcome to XpertAI. To help you better, I need a few details. Shall we start?";
+    const { settings } = useThemeSettings(); 
+    const welcomeMessage = settings?.chatbot_welcome_message || "Hello! I'm XpertAI. Let's get you started.";
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     
+    // Tracks which field we are currently asking about (e.g., 'name', 'email')
     const [currentField, setCurrentField] = useState(null); 
     const messagesEndRef = useRef(null);
 
@@ -22,11 +20,11 @@ const Chatbot = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // Function to start or continue the flow
+    // 1. Start Conversation
     const startFlow = async (isRestart = false) => {
         setIsLoading(true);
         try {
-            // 👇 Uses proper API with credentials
+            // First call with no data triggers the first question
             const response = await chatFlowHandler({
                 current_field: null, 
                 answer: null
@@ -34,162 +32,139 @@ const Chatbot = () => {
             const data = response.data;
 
             const initialMessages = [
-                { sender: 'bot', text: isRestart ? "Starting a fresh chat. Let's begin!" : welcomeMessage },
+                { sender: 'bot', text: isRestart ? "Let's start over." : welcomeMessage },
                 { sender: 'bot', text: data.next_question }
             ];
 
             setMessages(initialMessages);
-            setCurrentField(data.next_field);
+            setCurrentField(data.next_field); // e.g., 'name'
         } catch (error) {
-            console.error("Error starting chatbot flow:", error);
-            setMessages([
-                { sender: 'bot', text: 'I am experiencing connection issues. Please try again later.' }
-            ]);
+            console.error("Chatbot Error:", error);
+            setMessages([{ sender: 'bot', text: 'Connection failed. Please try again.' }]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Send answer and get next question
-    const handleSend = async (answer = inputValue.trim()) => {
-        if (!answer || currentField === null) return; 
+    // 2. Handle User Response
+    const handleSend = async () => {
+        const answer = inputValue.trim();
+        if (!answer || isLoading) return;
 
-        // 1. Display user message
+        // Display User Message
         setMessages(prev => [...prev, { sender: 'user', text: answer }]);
         setInputValue('');
         setIsLoading(true);
 
         try {
-            // 👇 Uses proper API with credentials
+            // Send answer to backend with the field identifier
             const response = await chatFlowHandler({
-                current_field: currentField, 
+                current_field: currentField, // Important: What are we answering?
                 answer: answer
             });
             const data = response.data;
             
-            // 3. Update state based on response
             if (data.error) {
-                // Validation error (e.g., empty field)
+                // Validation Error
                 setMessages(prev => [...prev, { sender: 'bot', text: data.error, isError: true }]);
-                // Don't change field, user needs to try again
-                // But we show the question again if needed
-                if (data.next_question && data.next_question !== messages[messages.length-1]?.text) {
-                     setMessages(prev => [...prev, { sender: 'bot', text: data.next_question }]);
-                }
             } else {
-                // Success path
+                // Success: Show next question
                 setMessages(prev => [...prev, { sender: 'bot', text: data.next_question }]);
-                setCurrentField(data.next_field); 
-
-                if (data.is_complete) {
-                    console.log("Lead captured:", data.action);
-                    setCurrentField(null); // Stop conversation
+                
+                // Update tracker to the next field (e.g., 'email')
+                if (data.next_field) {
+                    setCurrentField(data.next_field); 
+                } else {
+                    setCurrentField(null); // Flow Complete
                 }
             }
 
         } catch (error) {
-            console.error("Error handling flow step:", error);
-            setMessages(prev => [...prev, { sender: 'bot', text: 'A network error occurred. Please try sending your message again.' }]);
-            
+            setMessages(prev => [...prev, { sender: 'bot', text: 'Error sending message.' }]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Initial flow start on open
     useEffect(() => {
-        if (isOpen && messages.length === 0 && !settingsLoading) {
+        if (isOpen && messages.length === 0) {
             startFlow();
         }
-    }, [isOpen, settingsLoading]);
+    }, [isOpen]);
 
-    // Scroll to the bottom on new message
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
     const handleKeyDown = (e) => {
-        if (e.key === 'Enter' && inputValue.trim() && !isLoading && currentField !== null) {
-            handleSend();
-        }
-    };
-
-    const handleRestart = () => {
-        setMessages([]);
-        setCurrentField(null);
-        startFlow(true);
+        if (e.key === 'Enter') handleSend();
     };
 
     return (
         <>
             <button
-                className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition z-50"
+                className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition z-50"
                 onClick={() => setIsOpen(!isOpen)}
-                aria-label="Open Chatbot"
             >
                 <MessageSquare size={24} />
             </button>
 
             {isOpen && (
-                <div className="fixed bottom-20 right-6 w-80 h-96 bg-white border border-gray-300 rounded-lg shadow-2xl flex flex-col z-50">
+                <div className="fixed bottom-24 right-6 w-80 h-96 bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden font-sans">
                     
                     {/* Header */}
-                    <div className="bg-slate-800 text-white p-3 rounded-t-lg flex justify-between items-center">
-                        <h3 className="font-semibold text-lg">XpertAI Assistant</h3>
-                        <div className="flex items-center space-x-2">
-                             <button onClick={handleRestart} className="text-sm text-gray-400 hover:text-white" title="Restart Chat">Restart</button>
-                             <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">&times;</button>
+                    <div className="bg-slate-900 text-white p-4 flex justify-between items-center shadow-md">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <h3 className="font-semibold">XpertAI Assistant</h3>
+                        </div>
+                        <div className="flex gap-3">
+                             <button onClick={() => startFlow(true)} title="Restart"><RefreshCw size={16}/></button>
+                             <button onClick={() => setIsOpen(false)} title="Close">&times;</button>
                         </div>
                     </div>
 
-                    {/* Messages Container */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                    {/* Messages */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
                         {messages.map((msg, index) => (
                             <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-xs p-2 rounded-lg text-sm shadow-md ${
+                                <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                                     msg.sender === 'user' 
-                                    ? 'bg-blue-500 text-white' 
-                                    : msg.isError ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-gray-100 text-gray-800 border'
+                                    ? 'bg-blue-600 text-white rounded-br-none' 
+                                    : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none'
                                 }`}>
-                                    {msg.sender === 'bot' && <Bot size={14} className="inline mr-1" />}
-                                    {msg.sender === 'user' && <User size={14} className="inline mr-1" />}
                                     {msg.text}
                                 </div>
                             </div>
                         ))}
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="max-w-xs p-2 rounded-lg text-sm bg-gray-100 text-gray-800 border flex items-center">
-                                    <Loader size={14} className="animate-spin mr-2" />
-                                    Typing...
+                                <div className="bg-gray-200 p-2 rounded-full animate-pulse">
+                                    <Loader size={16} className="animate-spin text-gray-600" />
                                 </div>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Input Area */}
-                    <div className="p-3 border-t">
-                        <div className="flex">
-                            <input
-                                type="text"
-                                className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none"
-                                placeholder={currentField ? `Enter your ${currentField}...` : "Chat is complete. Click Restart."}
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                disabled={isLoading || currentField === null}
-                            />
-                            <button
-                                className={`p-2 rounded-r-lg text-white transition ${
-                                    currentField !== null && !isLoading ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
-                                }`}
-                                onClick={() => handleSend()}
-                                disabled={!inputValue.trim() || isLoading || currentField === null}
-                            >
-                                <Send size={20} />
-                            </button>
-                        </div>
+                    {/* Input */}
+                    <div className="p-3 bg-white border-t border-gray-100 flex gap-2">
+                        <input
+                            type="text"
+                            className="flex-1 p-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-700"
+                            placeholder={currentField ? "Type your answer..." : "Chat ended."}
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            disabled={!currentField || isLoading}
+                        />
+                        <button
+                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            onClick={handleSend}
+                            disabled={!inputValue.trim() || !currentField || isLoading}
+                        >
+                            <Send size={18} />
+                        </button>
                     </div>
                 </div>
             )}

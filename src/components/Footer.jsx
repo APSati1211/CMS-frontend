@@ -1,8 +1,33 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram, ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, ArrowUpRight, Mail, MapPin, Phone, Loader2, CheckCircle } from "lucide-react";
+import axios from "axios";
 
 export default function Footer({ logo }) {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("idle"); // idle, sending, success, error
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus("sending");
+    try {
+      // Use the API URL from environment variables or fallback
+      const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/api/";
+      
+      await axios.post(`${API_URL}subscribers/`, { email });
+      
+      setStatus("success");
+      setEmail("");
+      setTimeout(() => setStatus("idle"), 3000);
+    } catch (error) {
+      console.error("Subscription error:", error);
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 3000);
+    }
+  };
 
   const companyLinks = [
     { name: "About Us", path: "/about" },
@@ -21,7 +46,6 @@ export default function Footer({ logo }) {
   ];
 
   return (
-    // Fixed "Old Look" - Slate 950 Background
     <footer className="bg-slate-950 text-slate-300 border-t border-white/5 relative overflow-hidden">
       
       {/* Background Decorative Elements */}
@@ -37,7 +61,6 @@ export default function Footer({ logo }) {
               <img src={logo} alt="XpertAI Global" className="h-12 mb-4 object-contain" />
             ) : (
               <h2 className="text-3xl font-extrabold text-white tracking-tight">
-                {/* Fixed Blue Accent */}
                 XpertAI <span className="text-blue-500">Global</span>
               </h2>
             )}
@@ -104,16 +127,40 @@ export default function Footer({ logo }) {
             {/* Mini Newsletter */}
             <div className="mt-8">
               <p className="text-xs text-slate-500 mb-2 uppercase font-bold tracking-wider">Subscribe to Updates</p>
-              <div className="flex">
-                <input 
-                  type="email" 
-                  placeholder="Enter email" 
-                  className="bg-white/5 border border-white/10 rounded-l-lg px-4 py-2 text-sm text-white w-full focus:outline-none focus:border-blue-500"
-                />
-                <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-r-lg text-white transition">
-                  <ArrowUpRight size={18} />
-                </button>
-              </div>
+              <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
+                <div className="flex">
+                  <input 
+                    type="email" 
+                    placeholder="Enter email" 
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-l-lg px-4 py-2 text-sm text-white w-full focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    disabled={status === "sending" || status === "success"}
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={status === "sending" || status === "success"}
+                    className={`px-4 py-2 rounded-r-lg text-white transition flex items-center justify-center ${
+                      status === "success" ? "bg-green-600" : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                  >
+                    {status === "sending" ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : status === "success" ? (
+                      <CheckCircle size={18} />
+                    ) : (
+                      <ArrowUpRight size={18} />
+                    )}
+                  </button>
+                </div>
+                {status === "error" && (
+                  <p className="text-xs text-red-400">Something went wrong. Try again.</p>
+                )}
+                {status === "success" && (
+                  <p className="text-xs text-green-400">Subscribed successfully!</p>
+                )}
+              </form>
             </div>
           </div>
 

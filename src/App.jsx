@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getThemeSettings } from "./api"; // Updated import
+import { getThemeSettings } from "./api"; 
 
 // 📄 Pages
 import Home from "./pages/Home";
@@ -12,9 +12,9 @@ import About from "./pages/About";
 import Services from "./pages/Services";  
 import Contact from "./pages/Contact";
 import Stakeholders from "./pages/Stakeholders";
-// Features page removed
 import LeadSystem from "./pages/LeadSystem";
 import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail"; // <--- NEW IMPORT
 import Resources from "./pages/Resources";
 import Careers from "./pages/Careers";
 import ServiceDetail from "./pages/ServiceDetail";
@@ -28,13 +28,11 @@ function App() {
       .then((res) => {
         if (res.data) {
             setThemeData(res.data);
-            // CSS Variables update
             document.documentElement.style.setProperty('--primary-color', res.data.primary_color);
             document.documentElement.style.setProperty('--secondary-color', res.data.secondary_color);
             document.documentElement.style.setProperty('--accent-color', res.data.accent_color);
             document.documentElement.style.setProperty('--background-color', res.data.background_color);
             document.documentElement.style.setProperty('--text-color', res.data.text_color);
-            
             document.body.classList.remove("dark");
         }
       })
@@ -55,10 +53,10 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/stakeholders" element={<Stakeholders />} />
           
-          {/* Features Route Removed */}
-          
           <Route path="/lead-system" element={<LeadSystem />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} /> {/* <--- NEW ROUTE */}
+          
           <Route path="/resources" element={<Resources />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/services/:slug" element={<ServiceDetail />} />

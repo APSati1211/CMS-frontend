@@ -1,49 +1,47 @@
 import { useEffect, useState } from "react";
-// Assuming getCategories and getBlogs functions are correctly defined in src/api/index.js 
+import { Link } from "react-router-dom"; // <--- Import Link
 import { getBlogs, getCategories } from "../api"; 
 import { motion } from "framer-motion";
-import { Calendar, User, List } from "lucide-react"; 
+import { Calendar, User, List, Search, ArrowRight } from "lucide-react"; 
 import usePageContent from "../hooks/usePageContent"; 
 
 export default function Blog() {
   const { getField } = usePageContent("blog"); 
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
-  // selectedCategory mein 'null' hone par sabhi blogs dikhenge
-  const [selectedCategory, setSelectedCategory] = useState(null); 
+  
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); 
+  
   const [loading, setLoading] = useState(true);
 
-  // --- HANDLER FOR CATEGORY CLICKS (Task 4) ---
   const handleCategoryClick = (slug) => {
-    // Agar current category par click ho, toh filter hata do (null set kar do)
     setSelectedCategory(currentSlug => currentSlug === slug ? null : slug);
   };
 
-  // --- EFFECT 1: Fetch Categories (Task 4) ---
   useEffect(() => {
-    // Backend API endpoint: /api/blog-categories/
     getCategories()
       .then((res) => setCategories(res.data))
       .catch(err => console.error("Error fetching categories:", err));
   }, []);
 
-  // --- EFFECT 2: Fetch Filtered Blog Posts (Task 4) ---
   useEffect(() => {
     setLoading(true);
-    // Backend API call: /api/blogs/ ya /api/blogs/?category=slug
-    getBlogs(selectedCategory)
-      .then((res) => { 
-        setPosts(res.data); 
-      })
-      .catch(err => {
-          console.error("Error fetching blogs:", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [selectedCategory]); 
+    const timer = setTimeout(() => {
+        getBlogs(selectedCategory, searchQuery)
+          .then((res) => { 
+            setPosts(res.data); 
+          })
+          .catch(err => {
+              console.error("Error fetching blogs:", err);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+    }, 500); 
+    return () => clearTimeout(timer);
+  }, [selectedCategory, searchQuery]); 
   
-  // Current active filter ka naam display karne ke liye
   const currentFilterName = categories.find(cat => cat.slug === selectedCategory)?.name;
 
   return (
@@ -52,40 +50,57 @@ export default function Blog() {
       {/* Hero Section */}
       <div className="bg-slate-900 text-white py-24 text-center px-6">
         <h1 className="text-5xl font-bold mb-4">{getField("hero_title", "title") || "Latest Insights"}</h1>
-        {/* Filtered by name display */}
-        {selectedCategory && <p className="text-blue-400 font-semibold text-lg mb-2">Filtered by: {currentFilterName}</p>}
-        <p className="text-slate-400">{getField("hero_text") || "Trends, news, and expert analysis from XpertAI."}</p>
+        {searchQuery ? (
+            <p className="text-blue-400 font-semibold text-lg mb-2">Searching for: "{searchQuery}"</p>
+        ) : selectedCategory ? (
+            <p className="text-blue-400 font-semibold text-lg mb-2">Filtered by: {currentFilterName}</p>
+        ) : (
+            <p className="text-slate-400">{getField("hero_text") || "Trends, news, and expert analysis from XpertAI."}</p>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-16 grid lg:grid-cols-4 gap-12">
 
-        {/* Column 1: Sidebar Filters (Filter UI) */}
+        {/* Sidebar */}
         <div className="lg:col-span-1 space-y-8">
-          
-          {/* --- CATEGORY FILTER WIDGET (Task 4) --- */}
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+              <h4 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                  <Search className="text-blue-600" size={28} />
+                  {getField("search_placeholder", "title") || "Search"}
+              </h4>
+              <div className="relative">
+                <input 
+                    type="text" 
+                    placeholder="Type to search..." 
+                    className="w-full p-4 pl-5 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-lg shadow-sm placeholder:text-slate-400 text-slate-700"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+          </div>
+
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2"><List size={20} className="text-blue-600"/> {getField("category_title", "title") || "Filter Categories"}</h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <List size={20} className="text-blue-600"/> 
+                {getField("category_title", "title") || "Filter Categories"}
+            </h3>
             <ul className="space-y-2">
-              
-              {/* Show All Button (Filter reset) */}
               <li>
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`w-full text-left py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                    selectedCategory === null ? 'bg-slate-800 text-white shadow-md' : 'hover:bg-gray-200 text-slate-700'
+                  className={`w-full text-left py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+                    selectedCategory === null ? 'bg-slate-800 text-white shadow-md' : 'hover:bg-gray-100 text-slate-600'
                   }`}
                 >
                   All Articles
                 </button>
               </li>
-
-              {/* Dynamic Category Buttons */}
               {categories.map((cat) => (
                 <li key={cat.slug}>
                   <button
                     onClick={() => handleCategoryClick(cat.slug)}
-                    className={`w-full text-left py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                      selectedCategory === cat.slug ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-200 text-slate-700'
+                    className={`w-full text-left py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+                      selectedCategory === cat.slug ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-100 text-slate-600'
                     }`}
                   >
                     {cat.name}
@@ -94,41 +109,74 @@ export default function Blog() {
               ))}
             </ul>
           </div>
-          
-          {/* Search Widget (Placeholder) */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h4 className="text-xl font-bold text-slate-800 mb-4">{getField("search_placeholder", "title") || "Search Posts"}</h4>
-              <input type="text" placeholder="Start typing..." className="w-full p-3 border rounded-lg focus:border-blue-500"/>
-          </div>
-
         </div>
 
-        {/* Column 2: Blog Posts Grid */}
+        {/* Blog Grid */}
         <div className="lg:col-span-3">
           <h2 className="text-3xl font-bold text-slate-800 mb-8">{getField("latest_posts_title", "title") || "Latest Posts"}</h2>
           
-          {loading && <p className="text-center text-2xl text-blue-600 py-10">Loading Posts...</p>}
-          
-          {!loading && posts.length === 0 ? (
-            <p className="text-center text-xl text-gray-500 py-10">
-              {selectedCategory ? `No articles found in category "${currentFilterName}".` : "No articles published yet."}
-            </p>
+          {loading ? (
+             <div className="text-center py-20">
+                 <p className="text-2xl text-blue-600 font-semibold animate-pulse">Loading articles...</p>
+             </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
+                <p className="text-xl text-slate-500 font-medium">No articles found matching your criteria.</p>
+                {(searchQuery || selectedCategory) && (
+                    <button 
+                        onClick={() => { setSearchQuery(""); setSelectedCategory(null); }}
+                        className="mt-4 text-blue-600 font-bold hover:underline"
+                    >
+                        Clear Filters
+                    </button>
+                )}
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-10">
               {posts.map((blog, i) => (
-                <motion.div key={blog.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -10 }} className="bg-white rounded-2xl shadow-lg overflow-hidden group">
-                  {blog.image && <div className="h-48 overflow-hidden"><img src={blog.image} alt={blog.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" /></div>}
-                  <div className="p-6">
-                    {/* Dynamic Category Tag */}
-                    {blog.category && <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-3 py-1 rounded-full mb-3 inline-block">{blog.category.name || blog.category}</span>}
+                <motion.div 
+                  key={blog.id} 
+                  initial={{ opacity: 0, y: 20 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ y: -10 }} 
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden group border border-slate-100 h-full flex flex-col hover:shadow-2xl transition-all duration-300"
+                >
+                  {/* LINK 1: Image Click */}
+                  <Link to={`/blog/${blog.slug}`} className="h-52 overflow-hidden relative block">
+                      {blog.image ? (
+                          <img src={blog.image} alt={blog.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+                      ) : (
+                          <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">No Image</div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition duration-500"></div>
+                  </Link>
+
+                  <div className="p-8 flex flex-col flex-grow">
+                    {blog.category && (
+                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-4 w-fit border border-blue-100">
+                            {blog.category.name || blog.category}
+                        </span>
+                    )}
                     
-                    <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-blue-600 transition">{blog.title}</h3>
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-3">{blog.short_description}</p>
-                    <div className="flex items-center justify-between text-xs text-slate-400 border-t pt-4">
-                      <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(blog.created_at).toLocaleDateString()}</span>
-                      {/* Task 2: AUTHOR NAME CHANGE RETAINED */}
-                      <span className="flex items-center gap-1"><User size={14} /> XpertAI Global</span> 
+                    {/* LINK 2: Title Click */}
+                    <Link to={`/blog/${blog.slug}`}>
+                        <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors leading-tight">
+                            {blog.title}
+                        </h3>
+                    </Link>
+
+                    <p className="text-slate-500 text-base mb-6 line-clamp-3 leading-relaxed flex-grow">
+                        {blog.short_description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-xs font-medium text-slate-400 border-t border-slate-100 pt-5 mt-auto">
+                      <span className="flex items-center gap-1.5"><Calendar size={14} /> {new Date(blog.created_at).toLocaleDateString()}</span>
+                      
+                      {/* LINK 3: Text Click */}
+                      <Link to={`/blog/${blog.slug}`} className="flex items-center gap-1 text-blue-600 font-bold hover:underline">
+                          Read Full Story <ArrowRight size={14} />
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
