@@ -1,5 +1,12 @@
 import axios from "axios";
 
+// --- CSRF helper ---
+function getCookie(name) {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? decodeURIComponent(match.pop()) : null;
+}
+
 // --- CONFIGURATION ---
 const LOCAL_API_URL = "/api";
 const BASE_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) 
@@ -10,6 +17,16 @@ const API = axios.create({
     baseURL: BASE_URL, 
     withCredentials: true, // Yeh zaroori hai
 });
+
+// Attach CSRF token (if present) to every request
+API.interceptors.request.use((config) => {
+  const csrftoken = getCookie('csrftoken'); // Django default cookie name
+  if (csrftoken) {
+    config.headers['X-CSRFToken'] = csrftoken;
+  }
+  return config;
+}, (error) => Promise.reject(error));
+
 
 // --- 1. CMS & Pages ---
 export const getPageContent = (page) => {
