@@ -26,8 +26,9 @@ export default function Services() {
 
   const { hero, process, features, testimonials, faq, cta, services_list } = data || {};
 
+  // Helper for dynamic icons with fallback
   const renderIcon = (iconName, size=24, className="") => {
-    const Icon = LucideIcons[iconName] || LucideIcons.Star;
+    const Icon = LucideIcons[iconName] || LucideIcons.Briefcase;
     return <Icon size={size} className={className} />;
   };
 
@@ -41,48 +42,52 @@ export default function Services() {
            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
            className="text-5xl md:text-6xl font-bold mb-6 relative z-10"
          >
-           {hero?.title}
+           {hero?.title || "Our Expertise"}
          </motion.h1>
          <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-10 relative z-10">
-           {hero?.subtitle}
+           {hero?.subtitle || "Comprehensive financial solutions tailored for your growth."}
          </p>
       </div>
 
-      {/* 2. SERVICES GRID (Main List) */}
-      <div className="max-w-7xl mx-auto px-6 py-24 -mt-20 relative z-20">
-        <div className="grid md:grid-cols-3 gap-8">
+      {/* 2. SERVICES GRID (Main List) - Updated to 4 Columns */}
+      <div className="max-w-[90rem] mx-auto px-6 py-24 -mt-20 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services_list?.map((service, index) => (
             <motion.div 
               key={service.id}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
               whileHover={{ y: -10 }}
-              className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 group flex flex-col hover:shadow-2xl transition-all"
+              className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 group flex flex-col hover:shadow-2xl transition-all h-full"
             >
-              <div className="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                {renderIcon(service.icon, 32)}
+              <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                {renderIcon(service.icon, 28)}
               </div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-3">{service.title}</h3>
-              <p className="text-slate-600 mb-6 flex-grow">{service.short_description}</p>
-              <Link to={`/services/${service.slug}`} className="inline-flex items-center text-blue-600 font-bold group-hover:translate-x-2 transition-transform mt-auto">
-                Read More <ArrowRight size={18} className="ml-2" />
+              <h3 className="text-xl font-bold text-slate-800 mb-3">{service.title}</h3>
+              <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{service.short_description}</p>
+              
+              <Link 
+                to={`/services/${service.slug}`} 
+                className="inline-flex items-center text-blue-600 font-bold text-sm group-hover:translate-x-2 transition-transform mt-auto"
+              >
+                View Details <ArrowRight size={16} className="ml-2" />
               </Link>
             </motion.div>
           ))}
         </div>
       </div>
 
-      {/* 3. PROCESS */}
+      {/* 3. PROCESS - Updated to 4 Columns */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-[90rem] mx-auto px-6">
             <h2 className="text-3xl font-bold text-center mb-16 text-slate-900">Our Process</h2>
-            <div className="grid md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {process?.map((step, i) => (
-                    <div key={i} className="text-center relative">
+                    <div key={i} className="text-center relative px-4">
                         <div className="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600 shadow-md">
                             {renderIcon(step.icon_name, 32)}
                         </div>
-                        <h3 className="text-xl font-bold mb-2">{step.step_number}. {step.title}</h3>
-                        <p className="text-slate-600">{step.description}</p>
+                        <h3 className="text-lg font-bold mb-2">{step.step_number}. {step.title}</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">{step.description}</p>
                     </div>
                 ))}
             </div>

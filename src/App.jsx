@@ -11,14 +11,14 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Services from "./pages/Services";  
 import Contact from "./pages/Contact";
-import Stakeholders from "./pages/Stakeholders";
 import LeadSystem from "./pages/LeadSystem";
 import Blog from "./pages/Blog";
-import BlogDetail from "./pages/BlogDetail"; // <--- NEW IMPORT
+import BlogDetail from "./pages/BlogDetail";
 import Resources from "./pages/Resources";
 import Careers from "./pages/Careers";
 import ServiceDetail from "./pages/ServiceDetail";
 import LegalPage from "./pages/LegalPage";
+import Solutions from "./pages/Solutions";
 
 function App() {
   const [themeData, setThemeData] = useState(null);
@@ -51,17 +51,17 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/stakeholders" element={<Stakeholders />} />
           
           <Route path="/lead-system" element={<LeadSystem />} />
           <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogDetail />} /> {/* <--- NEW ROUTE */}
+          <Route path="/blog/:slug" element={<BlogDetail />} />
           
           <Route path="/resources" element={<Resources />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/services/:slug" element={<ServiceDetail />} />
           <Route path="/terms-and-conditions" element={<LegalPage slug="terms-and-conditions" />} />
           <Route path="/privacy-policy" element={<LegalPage slug="privacy-policy" />} />
+          <Route path="/solutions" element={<Solutions />} />
         </Routes>
 
         {/* Footer */}

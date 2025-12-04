@@ -35,15 +35,14 @@ export default function Navbar({ logo }) {
   }, [isOpen]);
 
   const mainLinks = [
-    { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Services", path: "/services" },
+    { name: "Solutions", path: "/solutions" },
     { name: "Careers", path: "/careers" },
     { name: "Resources", path: "/resources" },
   ];
 
   const dropdownLinks = [
-    { name: "Stakeholders", path: "/stakeholders" },
     { name: "Blog", path: "/blog" },
     { name: "Lead System", path: "/lead-system" },
     ...dynamicPages.map(page => ({ name: page.title, path: `/${page.slug}` }))

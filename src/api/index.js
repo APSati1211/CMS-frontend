@@ -44,6 +44,7 @@ export const getLeadSystemData = () => API.get("lead-system-data/");
 export const getServicesPageData = () => API.get("services-page-data/");
 export const getLegalPageData = (slug) => API.get(`legal/pages/${slug}/`);
 export const getCareersPageData = () => API.get("careers-page-data/");
+export const getContactPageData = () => API.get("contact-page-data/");
 
 // --- 3. Blog (UPDATED) ---
 export const getBlogs = (categorySlug = '', searchQuery = '') => {

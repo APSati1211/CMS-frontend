@@ -35,7 +35,6 @@ export default function ServiceDetail() {
     </div>
   );
 
-  // Helper for Dynamic Icons
   const renderIcon = (iconName) => {
     const Icon = LucideIcons[iconName] || LucideIcons.Briefcase;
     return <Icon size={40} className="text-blue-400" />;
@@ -44,9 +43,8 @@ export default function ServiceDetail() {
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       
-      {/* 1. HERO SECTION (Consistent Dark Theme) */}
+      {/* 1. HERO SECTION */}
       <section className="relative pt-40 pb-32 bg-slate-900 text-white overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="absolute top-20 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl mix-blend-screen animate-blob"></div>
         
@@ -73,7 +71,7 @@ export default function ServiceDetail() {
                     </div>
                 </motion.div>
 
-                {/* Hero Image / Abstract Visual */}
+                {/* Hero Visual */}
                 <motion.div 
                     initial={{ opacity: 0, scale: 0.9 }} 
                     animate={{ opacity: 1, scale: 1 }} 
@@ -81,52 +79,60 @@ export default function ServiceDetail() {
                     className="relative"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-2xl opacity-20"></div>
-                    {service.image ? (
-                        <img 
-                            src={service.image} 
-                            alt={service.title} 
-                            className="relative w-full rounded-2xl shadow-2xl border border-slate-700/50 object-cover aspect-video"
-                        />
-                    ) : (
-                        // Fallback Abstract Card if no image
-                        <div className="relative bg-slate-800 rounded-2xl border border-slate-700 p-8 aspect-video flex flex-col justify-center items-center text-center">
-                            <LucideIcons.Layers size={64} className="text-slate-600 mb-4" />
-                            <p className="text-slate-500 font-mono">Service Visual</p>
-                        </div>
-                    )}
+                    <div className="relative bg-slate-800 rounded-2xl border border-slate-700 p-8 aspect-video flex flex-col justify-center items-center text-center">
+                        <LucideIcons.Layers size={64} className="text-slate-600 mb-4" />
+                        <p className="text-slate-500 font-mono">Service Visual Placeholder</p>
+                    </div>
                 </motion.div>
             </div>
         </div>
       </section>
 
-      {/* 2. MAIN CONTENT AREA */}
+      {/* 2. MAIN CONTENT AREA (DYNAMIC SUB-SERVICES) */}
       <section className="py-20 px-6">
         <div className="container mx-auto grid lg:grid-cols-3 gap-12">
             
-            {/* Left Content (Detailed Description) */}
-            <div className="lg:col-span-2 space-y-12">
+            {/* Left Content: Sub-Services List */}
+            <div className="lg:col-span-2 space-y-8">
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }} 
                     whileInView={{ opacity: 1, y: 0 }} 
                     viewport={{ once: true }}
-                    className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100"
                 >
                     <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                        <ShieldCheck className="text-blue-600" /> Service Overview
+                        <ShieldCheck className="text-blue-600" /> What We Offer
                     </h2>
                     
-                    {/* HTML Content Rendering with Typography Styles */}
-                    <div 
-                        className="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-800 prose-a:text-blue-600 prose-img:rounded-xl"
-                        dangerouslySetInnerHTML={{ __html: service.full_description }} 
-                    />
+                    {/* Optional Intro Text */}
+                    {service.full_description && (
+                        <div className="prose prose-lg text-slate-600 mb-8" dangerouslySetInnerHTML={{ __html: service.full_description }} />
+                    )}
+
+                    {/* DYNAMIC LIST RENDERED HERE */}
+                    <div className="space-y-6">
+                        {service.sub_services && service.sub_services.length > 0 ? (
+                            service.sub_services.map((sub, index) => (
+                                <motion.div 
+                                    key={sub.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                                >
+                                    <h3 className="text-xl font-bold text-slate-900 mb-2">{sub.title}</h3>
+                                    <p className="text-slate-600 leading-relaxed">{sub.description}</p>
+                                </motion.div>
+                            ))
+                        ) : (
+                            <p className="text-slate-500 italic">Detailed service breakdown coming soon.</p>
+                        )}
+                    </div>
+
                 </motion.div>
             </div>
 
-            {/* Right Sidebar (Quick Actions & Features) */}
+            {/* Right Sidebar */}
             <div className="space-y-8">
-                
-                {/* Key Benefits Box */}
                 <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
                     <h3 className="text-xl font-bold mb-6">Why Choose XpertAI?</h3>
@@ -146,7 +152,6 @@ export default function ServiceDetail() {
                     </ul>
                 </div>
 
-                {/* Consultation Box */}
                 <div className="bg-white p-8 rounded-3xl shadow-lg border border-blue-100 text-center">
                     <Calendar size={48} className="text-blue-600 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-slate-900 mb-2">Book a Consultation</h3>
@@ -155,7 +160,6 @@ export default function ServiceDetail() {
                         Schedule Call
                     </Link>
                 </div>
-
             </div>
         </div>
       </section>
