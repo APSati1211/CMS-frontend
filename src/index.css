@@ -3,31 +3,54 @@
 @tailwind utilities;
 
 :root {
-  /* Updated Lighter Fallback Colors */
-  --primary-color: #1e293b;   /* Slate 800 (Lighter than 900) */
-  --secondary-color: #60a5fa; /* Blue 400 (Brighter) */
-  --accent-color: #fbbf24;    /* Amber 400 (Brighter) */
-  --background-color: #ffffff; /* Pure White */
-  --text-color: #475569;      /* Slate 600 (Softer Text) */
+  /* 🔥 SEXY LIGHT THEME PALETTE */
+  
+  /* Primary: Deep Indigo (Trust & Professionalism) */
+  --primary-color: #4338ca;   /* Indigo-700 */
+  
+  /* Secondary: Vibrant Violet (Modern Tech Feel) */
+  --secondary-color: #8b5cf6; /* Violet-500 */
+  
+  /* Accent: Hot Rose (High Energy for Buttons/CTAs) */
+  --accent-color: #f43f5e;    /* Rose-500 */
+  
+  /* Background: Pure White */
+  --background-color: #ffffff; 
+  
+  /* Text: Dark Slate (Sharp & Readable) */
+  --text-color: #0f172a;      /* Slate-900 */
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: 'Inter', sans-serif;
+  /* Thoda smooth rendering ke liye */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar for lighter theme */
+/* --- Sexy Custom Scrollbar (Gradient) --- */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #f1f5f9; 
+  background: #f8fafc; /* Slate-50 */
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #94a3b8; 
-  border-radius: 4px;
+  background: linear-gradient(180deg, #4338ca 0%, #8b5cf6 100%);
+  border-radius: 10px;
+  border: 2px solid #f8fafc;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b; 
+  background: #4338ca; 
+}
+
+/* --- Global Selection Color --- */
+::selection {
+  background-color: #8b5cf6; /* Violet */
+  color: white;
 }

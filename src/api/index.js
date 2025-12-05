@@ -77,8 +77,9 @@ export const getResources = () => API.get("resources/");
 export const getServices = () => API.get("services/");
 export const getServiceBySlug = (slug) => API.get(`services/${slug}/`);
 
-// --- 7. Stakeholders ---
+// --- 7. Stakeholders (Updated) ---
 export const getStakeholders = () => API.get("stakeholders/");
+export const getSolutionsPageData = () => API.get("solutions-page-data/"); // NEW FUNCTION
 
 // --- 8. Theme & Chatbot ---
 export const getThemeSettings = () => API.get("theme-settings/"); 

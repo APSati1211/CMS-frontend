@@ -2,11 +2,10 @@ import { motion } from "framer-motion";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
+import ScrollToTop from "./components/ScrollToTop"; 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getThemeSettings } from "./api"; 
 
-// 📄 Pages
+// 📄 Pages (Same imports)
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Services from "./pages/Services";  
@@ -21,29 +20,16 @@ import LegalPage from "./pages/LegalPage";
 import Solutions from "./pages/Solutions";
 
 function App() {
-  const [themeData, setThemeData] = useState(null);
-
-  useEffect(() => {
-    getThemeSettings()
-      .then((res) => {
-        if (res.data) {
-            setThemeData(res.data);
-            document.documentElement.style.setProperty('--primary-color', res.data.primary_color);
-            document.documentElement.style.setProperty('--secondary-color', res.data.secondary_color);
-            document.documentElement.style.setProperty('--accent-color', res.data.accent_color);
-            document.documentElement.style.setProperty('--background-color', res.data.background_color);
-            document.documentElement.style.setProperty('--text-color', res.data.text_color);
-            document.body.classList.remove("dark");
-        }
-      })
-      .catch(err => console.error("Failed to fetch theme settings:", err));
-  }, []);
+  // Theme state aur useEffect hata diya gaya hai.
+  // Ab website seedha CSS variables use karegi.
 
   return (
     <Router>
+      <ScrollToTop />
+
       <div className="bg-light min-h-screen flex flex-col">
-        {/* Navbar */}
-        <Navbar logo={themeData?.logo} />
+        {/* Logo prop hata diya, ab default text logo dikhega */}
+        <Navbar />
 
         {/* Routes */}
         <Routes>
@@ -65,7 +51,7 @@ function App() {
         </Routes>
 
         {/* Footer */}
-        <Footer logo={themeData?.logo} />
+        <Footer />
         
         {/* Chatbot */}
         <Chatbot />

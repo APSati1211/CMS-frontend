@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { Menu, X, ExternalLink } from "lucide-react"; // ChevronDown, ChevronRight hata diye kyunki dropdown nahi chahiye
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
 export default function Navbar({ logo }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [hovered, setHovered] = useState(null);
   const [scrolled, setScrolled] = useState(false);
-  const [dynamicPages, setDynamicPages] = useState([]);
+  // Dynamic pages state ki ab zarurat nahi agar "More" option hatana hai,
+  // par agar future mein chahiye to rakh sakte hain. Abhi ke liye unused hai.
+  // const [dynamicPages, setDynamicPages] = useState([]); 
   const location = useLocation();
 
   // --- Scroll Logic ---
@@ -16,11 +17,8 @@ export default function Navbar({ logo }) {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
 
-    // Fetch dynamic pages
-    axios.get("/api/pages/")
-      .then(res => setDynamicPages(res.data))
-      .catch(err => console.error("Menu fetch error", err));
-
+    // Dynamic pages fetch hata diya kyunki menu mein nahi dikhana hai
+    
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -42,15 +40,11 @@ export default function Navbar({ logo }) {
     { name: "Resources", path: "/resources" },
   ];
 
-  const dropdownLinks = [
-    { name: "Blog", path: "/blog" },
-    { name: "Lead System", path: "/lead-system" },
-    ...dynamicPages.map(page => ({ name: page.title, path: `/${page.slug}` }))
-  ];
+  // Dropdown links hata diye hain
 
   return (
     <>
-      {/* 🔹 NAVBAR HEADER (Fixed "Old Look" - Slate 900) */}
+      {/* 🔹 NAVBAR HEADER */}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -79,7 +73,6 @@ export default function Navbar({ logo }) {
                 whileHover={{ scale: 1.05 }}
                 className="text-2xl font-extrabold tracking-tighter flex items-center gap-2"
               >
-                {/* Fixed Gradient Text */}
                 <span className="bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text drop-shadow-lg">
                   XpertAI
                 </span>
@@ -107,50 +100,12 @@ export default function Navbar({ logo }) {
               </Link>
             ))}
 
-            {/* DROPDOWN */}
-            <div 
-              className="relative group"
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-            >
-              <button className="flex items-center gap-1 text-sm font-medium text-slate-300 hover:text-white transition-colors py-2">
-                More <ChevronDown size={14} className={`transition-transform duration-300 ${hovered ? "rotate-180 text-blue-400" : ""}`} />
-              </button>
-
-              <AnimatePresence>
-                {hovered && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="absolute top-full right-0 mt-2 w-56 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] overflow-hidden ring-1 ring-white/20"
-                  >
-                    <div className="p-2 space-y-1">
-                      <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Explore More
-                      </div>
-                      {dropdownLinks.map((link) => (
-                        <Link
-                          key={link.name}
-                          to={link.path}
-                          className="flex items-center justify-between px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-purple-600/10 rounded-xl transition-all group/item"
-                        >
-                          {link.name}
-                          <ChevronRight size={14} className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all text-blue-400" />
-                        </Link>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {/* "More" Dropdown Hata Diya Gaya Hai */}
 
             <Link to="/contact">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0px 0px 25px rgba(59, 130, 246, 0.6)" }}
                 whileTap={{ scale: 0.95 }}
-                // Fixed Gradient Button
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-bold text-sm border border-white/20 shadow-lg ml-2"
               >
                 Get Started
@@ -169,7 +124,7 @@ export default function Navbar({ logo }) {
         </div>
       </motion.nav>
 
-      {/* 🔹 MOBILE MENU OVERLAY (Fixed "Old Look" Colors) */}
+      {/* 🔹 MOBILE MENU OVERLAY */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -182,7 +137,8 @@ export default function Navbar({ logo }) {
             <div className="flex flex-col space-y-2 pb-10">
               <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Menu</div>
               
-              {[...mainLinks, ...dropdownLinks].map((link, idx) => (
+              {/* Sirf mainLinks use honge, dropdownLinks hata diye */}
+              {mainLinks.map((link, idx) => (
                 <motion.div
                   key={link.name}
                   initial={{ opacity: 0, x: -20 }}
