@@ -66,6 +66,7 @@ export const getCategories = () => API.get("blog-categories/");
 // --- 4. Leads & Contact ---
 export const submitLead = (data) => API.post("leads/", data);
 export const sendContact = (data) => API.post("contact/", data);
+export const submitTicket = (data) => API.post("tickets/", data); // <--- ADDED THIS
 
 // --- 5. Careers ---
 export const getJobs = () => API.get("jobs/");

@@ -4,35 +4,34 @@
 
 :root {
   /* 🔥 SEXY LIGHT THEME PALETTE */
-  
-  /* Primary: Deep Indigo (Trust & Professionalism) */
   --primary-color: #4338ca;   /* Indigo-700 */
-  
-  /* Secondary: Vibrant Violet (Modern Tech Feel) */
   --secondary-color: #8b5cf6; /* Violet-500 */
-  
-  /* Accent: Hot Rose (High Energy for Buttons/CTAs) */
   --accent-color: #f43f5e;    /* Rose-500 */
-  
-  /* Background: Pure White */
   --background-color: #ffffff; 
-  
-  /* Text: Dark Slate (Sharp & Readable) */
   --text-color: #0f172a;      /* Slate-900 */
+}
+
+/* --- Global Mobile Optimizations --- */
+html, body {
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  width: 100%;
+  -webkit-tap-highlight-color: transparent; /* iOS tap highlight remove */
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: 'Inter', sans-serif;
-  /* Thoda smooth rendering ke liye */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* iOS Safe Area Padding */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* --- Sexy Custom Scrollbar (Gradient) --- */
+/* --- Sexy Custom Scrollbar (Mobile Friendly) --- */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px; /* Mobile ke liye patla scrollbar */
 }
 
 ::-webkit-scrollbar-track {
@@ -42,15 +41,19 @@ body {
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #4338ca 0%, #8b5cf6 100%);
   border-radius: 10px;
-  border: 2px solid #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #4338ca; 
 }
 
-/* --- Global Selection Color --- */
 ::selection {
-  background-color: #8b5cf6; /* Violet */
+  background-color: #8b5cf6;
   color: white;
+}
+
+/* Mobile-specific adjustments for Typography */
+@media (max-width: 640px) {
+  h1 { font-size: 2.25rem !important; line-height: 1.2 !important; }
+  h2 { font-size: 1.75rem !important; }
 }
