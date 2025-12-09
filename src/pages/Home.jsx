@@ -63,7 +63,7 @@ export default function Home() {
   return (
     <div className="bg-slate-50 overflow-x-hidden font-sans">
       
-      {/* 1. HERO BANNER - Optimized for Mobile */}
+      {/* 1. HERO BANNER */}
       <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-slate-900 text-white overflow-hidden px-4">
         <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
         <div className="absolute top-20 right-0 w-96 h-96 bg-blue-600/30 rounded-full blur-3xl mix-blend-screen animate-blob"></div>
@@ -97,7 +97,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. HOW IT WORKS - Stacked on Mobile */}
+      {/* 2. HOW IT WORKS */}
       <section id="how-it-works" className="py-16 md:py-24 bg-white relative">
         <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-12 md:mb-20">
@@ -139,7 +139,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. KEY SERVICES - Grid Updated */}
+      {/* 3. KEY SERVICES */}
       {services && services.length > 0 && (
         <section className="py-16 md:py-24 bg-slate-50">
             <div className="container mx-auto px-4 md:px-6">
@@ -176,7 +176,53 @@ export default function Home() {
         </section>
       )}
 
-      {/* 4. AI SERVICE SELECTOR - Responsive */}
+      {/* 3.5. TRUSTED CLIENTS - Redesigned & Sexy */}
+      {clients && clients.length > 0 && (
+        <section className="py-20 bg-white relative overflow-hidden">
+           {/* Background Decoration */}
+           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+           
+           <div className="container mx-auto px-6 relative z-10 text-center">
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em] mb-12"
+              >
+                {content?.clients_title || "Powering the World's Best Finance Teams"}
+              </motion.p>
+
+              <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20">
+                {clients.map((client, i) => (
+                  <motion.div 
+                    key={client.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, type: "spring", stiffness: 100 }}
+                    className="group relative"
+                  >
+                     {/* Hover Glow Effect */}
+                     <div className="absolute -inset-6 bg-gradient-to-tr from-blue-100/30 to-purple-100/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                     
+                     <div className="relative grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 ease-out transform group-hover:scale-110 cursor-pointer">
+                        {client.logo ? (
+                           <img src={client.logo} alt={client.name} className="h-10 md:h-12 w-auto object-contain drop-shadow-sm group-hover:drop-shadow-lg transition-all" />
+                        ) : (
+                           <span className="text-xl md:text-2xl font-extrabold text-slate-300 group-hover:text-slate-800 transition-colors">
+                             {client.name}
+                           </span>
+                        )}
+                     </div>
+                  </motion.div>
+                ))}
+              </div>
+           </div>
+        </section>
+      )}
+
+      {/* 4. AI SERVICE SELECTOR */}
       <section className="py-16 md:py-24 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-slate-900"></div>
         <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -284,7 +330,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. QUICK LINKS - Stacked on Mobile */}
+      {/* 6. QUICK LINKS */}
       <section className="py-16 md:py-20 bg-blue-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
         <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
