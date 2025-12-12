@@ -112,7 +112,7 @@ export default function Solutions() {
                 </p>
                 
                 <ul className="space-y-3 mb-8">
-                  {/* Mock Features list for visual density - You can add these to DB if needed */}
+                  {/* Mock Features list for visual density */}
                   <li className="flex items-center gap-2 text-sm text-slate-500">
                     <CheckCircle2 size={16} className="text-green-500" /> Dedicated Dashboard
                   </li>
@@ -121,7 +121,13 @@ export default function Solutions() {
                   </li>
                 </ul>
 
-                <Link to="/register" className="inline-flex items-center text-slate-900 font-bold group-hover:text-blue-600 transition-colors mt-auto">
+                {/* UPDATED LINK: Changed from "/register" to "/contact" 
+                   Also added logic to use 'card.link' if it exists in your API data 
+                */}
+                <Link 
+                    to={card.link || "/contact"} 
+                    className="inline-flex items-center text-slate-900 font-bold group-hover:text-blue-600 transition-colors mt-auto"
+                >
                     Get Started <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -148,7 +154,7 @@ export default function Solutions() {
                   </p>
                   
                   <div className="flex flex-wrap gap-4 justify-center">
-                      <Link to="/register" className="bg-white text-slate-900 px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition shadow-lg hover:shadow-white/20 transform hover:-translate-y-1">
+                      <Link to="/contact" className="bg-white text-slate-900 px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition shadow-lg hover:shadow-white/20 transform hover:-translate-y-1">
                           Sign Up Now
                       </Link>
                       <Link to="/contact" className="bg-transparent border border-white/20 text-white px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition backdrop-blur-sm">
