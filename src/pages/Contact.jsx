@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, MapPin, Send, MessageSquare, Ticket, LifeBuoy, X, CheckCircle, Loader2, ChevronDown, Check } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, Ticket, LifeBuoy, X, Check, Loader2, ChevronDown } from "lucide-react";
 import { getContactPageData, submitLead, submitTicket, getServices } from "../api"; 
+import { useChat } from "../context/ChatContext"; 
+import { useLocation } from "react-router-dom"; // 👈 IMPORT THIS
 
 export default function Contact() {
+  const { openChat } = useChat();
+  const location = useLocation(); // 👈 HOOK TO READ URL
   const [data, setData] = useState(null);
   const [servicesList, setServicesList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +16,7 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", company: "", email: "", phone: "", service: "", sub_services: [], timeline: "", message: "" });
   const [status, setStatus] = useState(null);
 
+  // 1. DATA FETCHING
   useEffect(() => {
     Promise.all([getContactPageData(), getServices()])
       .then(([pageRes, servicesRes]) => {
@@ -24,6 +29,14 @@ export default function Contact() {
         setLoading(false);
       });
   }, []);
+
+  // 2. CHECK URL FOR TICKET ACTION
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("action") === "ticket") {
+        setIsTicketOpen(true);
+    }
+  }, [location]);
 
   const handleChange = (e) => setForm({...form, [e.target.name]: e.target.value});
 
@@ -58,11 +71,14 @@ export default function Contact() {
   const selectedServiceObj = servicesList.find(s => s.title === form.service);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 font-sans">
       
-      {/* 1. HERO SECTION - LIGHT */}
-      <div className="bg-slate-50 text-slate-900 pt-32 md:pt-40 pb-20 md:pb-24 text-center px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+      {/* 1. HERO SECTION */}
+      <div className="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-slate-50 text-slate-900 text-center px-4 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
+        <div className="absolute top-20 right-0 w-96 h-96 bg-blue-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob"></div>
+        <div className="absolute bottom-0 left-20 w-80 h-80 bg-purple-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob animation-delay-2000"></div>
+
         <motion.h1 
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
           className="text-3xl md:text-6xl font-bold mb-4 relative z-10"
@@ -92,7 +108,6 @@ export default function Contact() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
-                    {/* ... (Fields kept same, just rendering logic) ... */}
                     <div className="grid md:grid-cols-2 gap-4 md:gap-5">
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Name *</label>
@@ -114,7 +129,6 @@ export default function Contact() {
                         </div>
                     </div>
 
-                    {/* Services Dropdown */}
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">I am interested in... *</label>
                         <div className="relative">
@@ -216,7 +230,7 @@ export default function Contact() {
                         <Mail size={32} className="mx-auto mb-4 text-blue-500" />
                         <h3 className="font-bold text-lg mb-2">Email Support</h3>
                     </a>
-                    <button className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-blue-400 transition shadow-sm">
+                    <button onClick={openChat} className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-blue-400 transition shadow-sm">
                         <MessageSquare size={32} className="mx-auto mb-4 text-green-500" />
                         <h3 className="font-bold text-lg mb-2">Live Chat</h3>
                     </button>
@@ -230,9 +244,8 @@ export default function Contact() {
   );
 }
 
-// ... (TicketModal component kept same, it's a modal over content)
+// ... (TicketModal component kept same)
 function TicketModal({ isOpen, onClose }) {
-    // ... (Same logic, simple white modal)
     const [formData, setFormData] = useState({ name: "", email: "", subject: "", priority: "medium", description: "" });
     const [status, setStatus] = useState("idle");
 

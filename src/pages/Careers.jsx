@@ -34,7 +34,7 @@ export default function Careers() {
 
   const renderIcon = (iconName) => {
     const Icon = LucideIcons[iconName] || LucideIcons.Star;
-    return <Icon size={32} className="text-blue-500 mb-4" />;
+    return <Icon size={32} className="text-blue-600 mb-4" />;
   };
 
   if (loading) return (
@@ -64,22 +64,24 @@ export default function Careers() {
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden font-sans">
       
-      {/* 1. HERO SECTION */}
-      <div className="bg-slate-900 text-white pt-40 pb-32 text-center px-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl mix-blend-screen animate-blob"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-purple-600/20 rounded-full blur-3xl mix-blend-screen animate-blob animation-delay-2000"></div>
+      {/* 1. HERO SECTION - LIGHT THEME (MATCHING HOME) */}
+      <div className="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-slate-50 text-slate-900 text-center px-6 overflow-hidden">
+        {/* Background Patterns */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
+        <div className="absolute top-20 right-0 w-96 h-96 bg-blue-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob"></div>
+        <div className="absolute bottom-0 left-20 w-80 h-80 bg-purple-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob animation-delay-2000"></div>
         
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <span className="inline-block py-1 px-3 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-6 tracking-wide uppercase">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="relative z-10">
+            <span className="inline-block py-1 px-3 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-xs font-semibold mb-6 tracking-wide uppercase">
                 We are hiring
             </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 relative z-10 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-slate-900">
               {content?.hero_title}
             </h1>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto relative z-10 leading-relaxed">
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
               {content?.hero_subtitle}
             </p>
-            <button onClick={() => document.getElementById('openings').scrollIntoView({behavior: 'smooth'})} className="mt-10 bg-white text-slate-900 px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition shadow-lg flex items-center gap-2 mx-auto">
+            <button onClick={() => document.getElementById('openings').scrollIntoView({behavior: 'smooth'})} className="mt-10 bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg flex items-center gap-2 mx-auto">
                 View Openings <ArrowRight size={18} />
             </button>
         </motion.div>

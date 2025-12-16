@@ -23,11 +23,14 @@ export default function Services() {
   };
 
   return (
-    <div className="bg-slate-50 overflow-x-hidden">
+    <div className="bg-slate-50 overflow-x-hidden font-sans">
       
-      {/* 1. HERO - LIGHT */}
-      <div className="relative pt-40 pb-32 bg-slate-50 text-slate-900 overflow-hidden text-center px-6">
-         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+      {/* HERO SECTION - MATCHING HOME THEME */}
+      <div className="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-slate-50 text-slate-900 overflow-hidden text-center px-6">
+         <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
+         <div className="absolute top-20 right-0 w-96 h-96 bg-blue-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob"></div>
+         <div className="absolute bottom-0 left-20 w-80 h-80 bg-purple-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob animation-delay-2000"></div>
+
          <motion.h1 
            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
            className="text-5xl md:text-6xl font-bold mb-6 relative z-10"
@@ -39,7 +42,7 @@ export default function Services() {
          </p>
       </div>
 
-      {/* 2. SERVICES GRID */}
+      {/* SERVICES GRID */}
       <div className="max-w-[90rem] mx-auto px-6 py-24 -mt-20 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services_list?.map((service, index) => (
@@ -63,7 +66,7 @@ export default function Services() {
         </div>
       </div>
 
-      {/* 3. PROCESS */}
+      {/* PROCESS */}
       <section className="py-20 bg-white border-t border-slate-100">
         <div className="max-w-[90rem] mx-auto px-6">
             <h2 className="text-3xl font-bold text-center mb-16 text-slate-900">Our Process</h2>
@@ -81,7 +84,7 @@ export default function Services() {
         </div>
       </section>
 
-      {/* 4. FEATURES - LIGHT */}
+      {/* FEATURES */}
       <section className="py-20 bg-slate-100 text-slate-900">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-8">
             {features?.map((feat, i) => (
@@ -94,7 +97,7 @@ export default function Services() {
         </div>
       </section>
 
-      {/* 5. FAQ */}
+      {/* FAQ */}
       <section className="py-20 px-6 max-w-3xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-12 text-slate-900">Frequently Asked Questions</h2>
         <div className="space-y-4">
@@ -116,7 +119,7 @@ export default function Services() {
         </div>
       </section>
 
-      {/* 6. CTA - LIGHT (Blue Gradient) */}
+      {/* CTA */}
       {cta && (
         <section className="py-20 px-6">
             <div className="max-w-5xl mx-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-3xl p-12 text-center shadow-2xl">

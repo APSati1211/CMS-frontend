@@ -2,17 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bot, User, Send, MessageSquare, Loader, RefreshCw } from 'lucide-react';
 import { chatFlowHandler } from '../api'; 
 import useThemeSettings from '../hooks/useThemeSettings'; 
+import { useChat } from '../context/ChatContext'; // 👈 IMPORT THIS
 
 const Chatbot = () => {
     const { settings } = useThemeSettings(); 
     const welcomeMessage = settings?.chatbot_welcome_message || "Hello! I'm XpertAI. Let's get you started.";
 
-    const [isOpen, setIsOpen] = useState(false);
+    // 👇 USE GLOBAL CONTEXT INSTEAD OF LOCAL STATE
+    const { isOpen, toggleChat, setIsOpen } = useChat(); // Note: setIsOpen agar direct use karna ho toh context se export karein, ya toggleChat use karein.
+    
+    // Internal logic for messages remains same
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    
-    // Tracks which field we are currently asking about (e.g., 'name', 'email')
     const [currentField, setCurrentField] = useState(null); 
     const messagesEndRef = useRef(null);
 
@@ -20,11 +22,9 @@ const Chatbot = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // 1. Start Conversation
     const startFlow = async (isRestart = false) => {
         setIsLoading(true);
         try {
-            // First call with no data triggers the first question
             const response = await chatFlowHandler({
                 current_field: null, 
                 answer: null
@@ -37,7 +37,7 @@ const Chatbot = () => {
             ];
 
             setMessages(initialMessages);
-            setCurrentField(data.next_field); // e.g., 'name'
+            setCurrentField(data.next_field); 
         } catch (error) {
             console.error("Chatbot Error:", error);
             setMessages([{ sender: 'bot', text: 'Connection failed. Please try again.' }]);
@@ -46,49 +46,32 @@ const Chatbot = () => {
         }
     };
 
-    // 2. Handle User Response
     const handleSend = async () => {
         const answer = inputValue.trim();
-        
-        // Prevent sending empty answers if you want strict validation here too
-        if (!answer && currentField !== 'message') { // Allow empty message if it's optional
+        if (!answer && currentField !== 'message') { 
              if (isLoading) return;
         }
-        
         if (isLoading) return;
 
-        // Display User Message
         setMessages(prev => [...prev, { sender: 'user', text: answer }]);
         setInputValue('');
         setIsLoading(true);
 
         try {
-            // Send answer to backend with the field identifier
             const response = await chatFlowHandler({
-                current_field: currentField, // Important: What are we answering?
+                current_field: currentField,
                 answer: answer
             });
             const data = response.data;
             
             if (data.error) {
-                // Validation Error form Backend
                 setMessages(prev => [...prev, { sender: 'bot', text: data.error, isError: true }]);
             } else {
-                // Success: Show next question
                 setMessages(prev => [...prev, { sender: 'bot', text: data.next_question }]);
-                
-                // Update tracker to the next field (e.g., 'email')
                 if (data.next_field) {
                     setCurrentField(data.next_field); 
                 } else {
-                    // Chat Complete
                     setCurrentField(null); 
-                    if (data.action === 'lead_captured') {
-                        // Optional: Close chat after a delay or show success state
-                        setTimeout(() => {
-                            // You can keep it open or close it
-                        }, 3000);
-                    }
                 }
             }
 
@@ -118,7 +101,7 @@ const Chatbot = () => {
         <>
             <button
                 className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition z-50"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={toggleChat} // 👈 USE GLOBAL TOGGLE
             >
                 <MessageSquare size={24} />
             </button>
@@ -134,7 +117,7 @@ const Chatbot = () => {
                         </div>
                         <div className="flex gap-3">
                              <button onClick={() => startFlow(true)} title="Restart" className="hover:text-blue-300 transition"><RefreshCw size={16}/></button>
-                             <button onClick={() => setIsOpen(false)} title="Close" className="hover:text-red-300 transition">&times;</button>
+                             <button onClick={toggleChat} title="Close" className="hover:text-red-300 transition">&times;</button>
                         </div>
                     </div>
 

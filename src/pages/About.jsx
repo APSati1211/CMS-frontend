@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getAboutPageData } from "../api"; 
-import { Target, Eye, Heart, Globe, Award, Leaf, ArrowRight } from "lucide-react";
+import { Target, Eye, Heart, Award, ArrowRight } from "lucide-react";
 import * as LucideIcons from "lucide-react"; 
 import { Link } from "react-router-dom";
 
@@ -31,11 +31,14 @@ export default function About() {
   const { content, team, awards, tech_stack } = data || {};
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-hidden font-sans">
       
-      {/* HERO SECTION - LIGHT THEME */}
-      <div className="relative bg-slate-50 text-slate-900 pt-40 pb-32 px-6 text-center">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+      {/* HERO SECTION - MATCHING HOME THEME */}
+      <div className="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-slate-50 text-slate-900 overflow-hidden px-4 text-center">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
+        <div className="absolute top-20 right-0 w-96 h-96 bg-blue-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob"></div>
+        <div className="absolute bottom-0 left-20 w-80 h-80 bg-purple-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob animation-delay-2000"></div>
+
         <motion.h1 
           initial={{ y: -30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           className="text-5xl md:text-7xl font-bold mb-6 relative z-10"
@@ -56,13 +59,10 @@ export default function About() {
           </p>
         </motion.div>
         <motion.div initial={{ scale: 0.8, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} className="relative">
-            {/* Infographic Placeholder / Image */}
             {content?.story_image ? (
-                <img src={content.story_image} alt="Company Overview Infographic" className="rounded-2xl shadow-2xl border border-slate-200" />
+                <img src={content.story_image} alt="Overview" className="rounded-2xl shadow-2xl border border-slate-200" />
             ) : (
-                <div className="bg-blue-50 rounded-2xl h-80 flex items-center justify-center border-2 border-dashed border-blue-200 text-blue-400 font-bold">
-                    Infographic Area
-                </div>
+                <div className="bg-blue-50 rounded-2xl h-80 flex items-center justify-center border-2 border-dashed border-blue-200 text-blue-400 font-bold">Infographic Area</div>
             )}
         </motion.div>
       </section>
@@ -87,7 +87,7 @@ export default function About() {
         </div>
       </div>
 
-      {/* iii. LEADERSHIP & ADVISORY TEAM */}
+      {/* iii. LEADERSHIP */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">Leadership & Advisory Team</h2>
@@ -112,16 +112,14 @@ export default function About() {
         </div>
       </section>
 
-      {/* iv. TECHNOLOGY STACK - LIGHT THEME */}
+      {/* iv. TECH STACK */}
       {tech_stack && tech_stack.length > 0 && (
-        <section className="py-24 px-6 bg-slate-50 text-slate-900 relative overflow-hidden">
+        <section className="py-24 px-6 bg-slate-50 text-slate-900 relative overflow-hidden border-t border-slate-200">
             <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
             <div className="max-w-7xl mx-auto relative z-10">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Technology Stack</h2>
-                    <p className="text-slate-500 max-w-2xl mx-auto">
-                        Built on the pillars of AI, Automation, and Blockchain.
-                    </p>
+                    <p className="text-slate-500 max-w-2xl mx-auto">Built on the pillars of AI, Automation, and Blockchain.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {tech_stack.map((tech, index) => (
@@ -142,7 +140,7 @@ export default function About() {
         </section>
       )}
 
-      {/* EXTRA SECTIONS */}
+      {/* EXTRA: AWARDS */}
       {awards && awards.length > 0 && (
         <section className="py-20 bg-blue-50 px-6">
             <div className="max-w-6xl mx-auto text-center">
@@ -162,7 +160,7 @@ export default function About() {
         </section>
       )}
 
-      {/* CTA - LIGHT THEME (Blue Gradient) */}
+      {/* CTA */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-24 text-center px-6">
         <h2 className="text-4xl md:text-5xl font-bold mb-6">{content?.cta_title}</h2>
         <p className="mb-10 text-blue-100 text-lg">{content?.cta_text}</p>
@@ -170,7 +168,6 @@ export default function About() {
             Contact Us <ArrowRight size={20} className="ml-2" />
         </Link>
       </div>
-
     </div>
   );
 }

@@ -132,4 +132,4 @@ export default function LegalPage({ slug }) {
       </div>
     </div>
   );
-}
+} 

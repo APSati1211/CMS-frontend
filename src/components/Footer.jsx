@@ -6,8 +6,10 @@ import {
   Loader2, CheckCircle, MessageSquare, Ticket, FileText 
 } from "lucide-react";
 import axios from "axios";
+import { useChat } from "../context/ChatContext"; 
 
 export default function Footer({ logo }) {
+  const { openChat } = useChat(); 
   const currentYear = new Date().getFullYear();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
@@ -29,13 +31,11 @@ export default function Footer({ logo }) {
     }
   };
 
-  // --- DATA STRUCTURE AS PER DOCUMENT ---
-  
   const companyLinks = [
     { name: "About Us", path: "/about" },
-    { name: "Our Team", path: "/about" }, // Mapped to About page
+    { name: "Our Team", path: "/about" },
     { name: "Careers", path: "/careers" },
-    { name: "Advisory Board", path: "/about" }, // Mapped to About page
+    { name: "Advisory Board", path: "/about" },
   ];
 
   const resourceLinks = [
@@ -62,8 +62,9 @@ export default function Footer({ logo }) {
 
   const otherLinks = [
     { name: "Contact Us", path: "/contact", icon: Phone },
-    { name: "Live Chat", path: "/contact", icon: MessageSquare }, // Or trigger chatbot
-    { name: "Raise a Ticket", path: "/contact", icon: Ticket },
+    { name: "Live Chat", path: "#", icon: MessageSquare }, 
+    // 👇 UPDATED LINK: Added query param '?action=ticket'
+    { name: "Raise a Ticket", path: "/contact?action=ticket", icon: Ticket },
     { name: "Offices Address", path: "/contact", icon: MapPin },
     { name: "View on Map", path: "https://maps.google.com", icon: ArrowUpRight, external: true },
   ];
@@ -71,13 +72,13 @@ export default function Footer({ logo }) {
   const legalLinks = [
     { name: "Privacy Policy", path: "/privacy-policy" },
     { name: "Terms of Use", path: "/terms-and-conditions" },
-    { name: "Refund Policy", path: "/refund-policy" }, // New page link
+    { name: "Refund Policy", path: "/refund-policy" },
   ];
 
   return (
     <footer className="bg-slate-200 text-slate-600 border-t border-slate-300 relative overflow-hidden font-sans">
       
-      {/* Background Elements (Subtle Light Mode Blobs) */}
+      {/* Background Elements */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/40 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
       <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-100/40 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -126,16 +127,13 @@ export default function Footer({ logo }) {
         {/* MAIN GRID LAYOUT */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
           
-          {/* COLUMN 1: Company & Resources */}
           <div className="space-y-8">
             <div>
                 <h3 className="text-slate-900 font-bold text-lg mb-4 border-l-4 border-blue-500 pl-3">Company</h3>
                 <ul className="space-y-3 text-sm">
                   {companyLinks.map((item) => (
                     <li key={item.name}>
-                      <Link to={item.path} className="hover:text-blue-600 transition-colors block">
-                        {item.name}
-                      </Link>
+                      <Link to={item.path} className="hover:text-blue-600 transition-colors block">{item.name}</Link>
                     </li>
                   ))}
                 </ul>
@@ -145,39 +143,31 @@ export default function Footer({ logo }) {
                 <ul className="space-y-3 text-sm">
                   {resourceLinks.map((item) => (
                     <li key={item.name}>
-                      <Link to={item.path} className="hover:text-blue-600 transition-colors block text-blue-600 font-medium">
-                        {item.name} →
-                      </Link>
+                      <Link to={item.path} className="hover:text-blue-600 transition-colors block text-blue-600 font-medium">{item.name} →</Link>
                     </li>
                   ))}
                 </ul>
             </div>
           </div>
 
-          {/* COLUMN 2: Services */}
           <div>
             <h3 className="text-slate-900 font-bold text-lg mb-6 border-l-4 border-blue-500 pl-3">Services</h3>
             <ul className="space-y-3 text-sm">
               {serviceLinks.map((item) => (
                 <li key={item.name}>
-                  <Link to={item.path} className="hover:text-blue-600 transition-colors block">
-                    {item.name}
-                  </Link>
+                  <Link to={item.path} className="hover:text-blue-600 transition-colors block">{item.name}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* COLUMN 3: Solutions & Useful Links */}
           <div className="space-y-8">
             <div>
                 <h3 className="text-slate-900 font-bold text-lg mb-6 border-l-4 border-blue-500 pl-3">Solutions</h3>
                 <ul className="space-y-3 text-sm">
                   {solutionLinks.map((item) => (
                     <li key={item.name}>
-                      <Link to={item.path} className="hover:text-blue-600 transition-colors block">
-                        {item.name}
-                      </Link>
+                      <Link to={item.path} className="hover:text-blue-600 transition-colors block">{item.name}</Link>
                     </li>
                   ))}
                 </ul>
@@ -187,23 +177,25 @@ export default function Footer({ logo }) {
                 <ul className="space-y-3 text-sm">
                   {usefulLinks.map((item) => (
                     <li key={item.name}>
-                      <Link to={item.path} className="hover:text-blue-600 transition-colors block flex items-center gap-2">
-                        <FileText size={14} /> {item.name}
-                      </Link>
+                      <Link to={item.path} className="hover:text-blue-600 transition-colors block flex items-center gap-2"><FileText size={14} /> {item.name}</Link>
                     </li>
                   ))}
                 </ul>
             </div>
           </div>
 
-          {/* COLUMN 4: Others (Contact & Legal) */}
           <div className="space-y-8">
             <div>
                 <h3 className="text-slate-900 font-bold text-lg mb-6 border-l-4 border-blue-500 pl-3">Others</h3>
                 <ul className="space-y-3 text-sm">
                   {otherLinks.map((item) => (
                     <li key={item.name}>
-                        {item.external ? (
+                        {item.name === "Live Chat" ? (
+                            <button onClick={openChat} className="hover:text-blue-600 transition-colors flex items-center gap-2 group text-left w-full">
+                                {item.icon && <item.icon size={14} className="text-slate-500 group-hover:text-blue-600" />}
+                                {item.name}
+                            </button>
+                        ) : item.external ? (
                             <a href={item.path} target="_blank" rel="noreferrer" className="hover:text-blue-600 transition-colors flex items-center gap-2 group">
                                 {item.icon && <item.icon size={14} className="text-slate-500 group-hover:text-blue-600" />}
                                 {item.name}
@@ -223,9 +215,7 @@ export default function Footer({ logo }) {
                 <ul className="space-y-2 text-xs text-slate-500">
                     {legalLinks.map((item) => (
                         <li key={item.name}>
-                            <Link to={item.path} className="hover:text-slate-800 transition-colors">
-                                {item.name}
-                            </Link>
+                            <Link to={item.path} className="hover:text-slate-800 transition-colors">{item.name}</Link>
                         </li>
                     ))}
                 </ul>
@@ -234,7 +224,6 @@ export default function Footer({ logo }) {
 
         </div>
 
-        {/* BOTTOM COPYRIGHT & SOCIALS */}
         <div className="mt-20 pt-8 border-t border-slate-300 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
           <p>© {currentYear} XpertAI Global. All rights reserved.</p>
           <div className="flex gap-4">
