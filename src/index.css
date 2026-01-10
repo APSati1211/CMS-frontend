@@ -9,6 +9,10 @@
   --accent-color: #f43f5e;    /* Rose-500 */
   --background-color: #ffffff; 
   --text-color: #0f172a;      /* Slate-900 */
+  
+  /* Layout Variables */
+  --sidebar-width: 260px;
+  --header-height: 64px;
 }
 
 /* --- Global Mobile Optimizations --- */
@@ -16,6 +20,7 @@ html, body {
   overflow-x: hidden; /* Prevent horizontal scroll */
   width: 100%;
   -webkit-tap-highlight-color: transparent; /* iOS tap highlight remove */
+  scroll-behavior: smooth;
 }
 
 body {
@@ -31,7 +36,8 @@ body {
 
 /* --- Sexy Custom Scrollbar (Mobile Friendly) --- */
 ::-webkit-scrollbar {
-  width: 6px; /* Mobile ke liye patla scrollbar */
+  width: 6px;        /* Vertical scrollbar width */
+  height: 6px;       /* Horizontal scrollbar height */
 }
 
 ::-webkit-scrollbar-track {
@@ -52,8 +58,91 @@ body {
   color: white;
 }
 
-/* Mobile-specific adjustments for Typography */
+/* =========================================
+   📱 MEDIA QUERIES (Responsive Design)
+   ========================================= */
+
+/* -----------------------------------------
+   1. MOBILE DEVICES (< 640px) 
+   ----------------------------------------- */
 @media (max-width: 640px) {
-  h1 { font-size: 2.25rem !important; line-height: 1.2 !important; }
-  h2 { font-size: 1.75rem !important; }
+  /* Typography Scaling */
+  h1 { font-size: 2rem !important; line-height: 1.2 !important; }
+  h2 { font-size: 1.5rem !important; margin-bottom: 0.75rem; }
+  h3 { font-size: 1.25rem !important; }
+  p  { font-size: 0.95rem; line-height: 1.6; }
+
+  /* Admin Panel specific: Ensure tables scroll on small screens */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Adjust container padding */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* -----------------------------------------
+   2. TABLET DEVICES (641px - 1024px) 
+   ----------------------------------------- */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 { font-size: 2.5rem !important; }
+  h2 { font-size: 2rem !important; }
+  
+  /* Admin Grid: 2 columns usually look better on tablet than 3 or 4 */
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* -----------------------------------------
+   3. DESKTOP & LARGE SCREENS (> 1025px) 
+   ----------------------------------------- */
+@media (min-width: 1025px) {
+  h1 { font-size: 3.5rem !important; }
+  h2 { font-size: 2.5rem !important; }
+  
+  /* Ensure Admin Sidebar stays fixed if you use a specific class */
+  .admin-sidebar-fixed {
+    width: var(--sidebar-width);
+    position: fixed;
+    height: 100vh;
+  }
+}
+
+/* -----------------------------------------
+   4. PRINT STYLES (For Admin Reports/Invoices) 
+   ----------------------------------------- */
+@media print {
+  /* Hide UI elements when printing */
+  nav, footer, aside, .no-print, button {
+    display: none !important;
+  }
+  
+  /* Reset background for saving ink */
+  body {
+    background: white;
+    color: black;
+  }
+  
+  /* Ensure content takes full width */
+  main, .admin-content {
+    margin: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+  
+  /* Improve table readability */
+  table {
+    border-collapse: collapse !important;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8px !important;
+  }
 }
