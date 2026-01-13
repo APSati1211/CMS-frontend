@@ -171,28 +171,28 @@ export default function SubscribersManager() {
   };
 
 
-  if (loading) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-blue-600"/></div>;
+  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin mx-auto text-blue-600" size={40}/></div>;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-10 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 pb-10 animate-in fade-in duration-500">
       
       {/* HEADER & TABS */}
-      <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-6">
+      <div className="flex flex-col space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Email Marketing</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Email Marketing</h1>
           <p className="text-slate-500 mt-1">Manage subscribers and send email campaigns.</p>
         </div>
         
-        <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200 w-full sm:w-fit">
             <button 
                 onClick={() => setActiveTab('list')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition ${activeTab === 'list' ? 'bg-slate-900 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}
+                className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition ${activeTab === 'list' ? 'bg-slate-900 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}
             >
                 <Users size={16}/> Subscribers
             </button>
             <button 
                 onClick={() => setActiveTab('templates')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition ${activeTab === 'templates' ? 'bg-slate-900 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}
+                className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition ${activeTab === 'templates' ? 'bg-slate-900 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}
             >
                 <FileText size={16}/> Templates
             </button>
@@ -204,8 +204,8 @@ export default function SubscribersManager() {
         <div className="space-y-4">
             
             {/* Controls */}
-            <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div className="relative w-96">
+            <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div className="relative w-full sm:w-96">
                     <Search className="absolute left-3 top-3 text-slate-400" size={18}/>
                     <input 
                         type="text" 
@@ -215,29 +215,29 @@ export default function SubscribersManager() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3 w-full sm:w-auto">
                     {selectedSubscribers.length > 0 && (
                         <button 
                             onClick={openEmailModal}
-                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition animate-in zoom-in"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition animate-in zoom-in"
                         >
                             <Send size={18}/> Send Email ({selectedSubscribers.length})
                         </button>
                     )}
                     <button 
                         onClick={handleExport}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-green-700 transition shadow-sm"
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition shadow-sm"
                     >
                         <Download size={18}/> Export CSV
                     </button>
-                    <div className="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-bold text-sm flex items-center">
+                    <div className="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-bold text-sm flex items-center justify-center">
                         Total: {subscribers.length}
                     </div>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <table className="w-full text-left text-sm text-slate-600">
                     <thead className="bg-slate-50 border-b border-slate-100 uppercase text-xs font-bold text-slate-500">
                     <tr>
@@ -279,6 +279,36 @@ export default function SubscribersManager() {
                     )}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="sm:hidden space-y-3">
+                {filteredSubscribers.map((sub) => (
+                    <div key={sub.id} className={`bg-white p-4 rounded-xl shadow-sm border ${selectedSubscribers.includes(sub.id) ? 'border-blue-300 bg-blue-50' : 'border-slate-200'}`}>
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => toggleSelectOne(sub.id)}>
+                                    {selectedSubscribers.includes(sub.id) 
+                                        ? <CheckSquare className="text-blue-600" size={20}/> 
+                                        : <Square className="text-slate-300" size={20}/>
+                                    }
+                                </button>
+                                <div>
+                                    <p className="font-medium text-slate-800">{sub.email}</p>
+                                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                                        <Calendar size={12}/> {new Date(sub.subscribed_at).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => handleDeleteSubscriber(sub.id)} className="text-red-400 hover:text-red-600 p-2"><Trash2 size={18}/></button>
+                        </div>
+                    </div>
+                ))}
+                {filteredSubscribers.length === 0 && (
+                    <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 text-center text-slate-400">
+                        No subscribers found.
+                    </div>
+                )}
             </div>
         </div>
       )}
@@ -347,8 +377,8 @@ export default function SubscribersManager() {
 
       {/* ======================= EMAIL COMPOSER MODAL ======================= */}
       {emailModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-in fade-in duration-200 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden m-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-in fade-in duration-200 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
                 <div className="bg-slate-900 text-white p-4 flex justify-between items-center">
                     <h3 className="font-bold flex items-center gap-2"><Mail size={20}/> Compose Email</h3>
                     <button onClick={() => setEmailModalOpen(false)} className="bg-white/10 p-2 rounded-full hover:bg-white/20"><X size={18}/></button>
@@ -387,12 +417,12 @@ export default function SubscribersManager() {
                     </div>
                 </div>
 
-                <div className="bg-slate-50 p-4 border-t flex justify-end gap-3">
-                    <button onClick={() => setEmailModalOpen(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg">Cancel</button>
+                <div className="bg-slate-50 p-4 border-t flex flex-col sm:flex-row sm:justify-end gap-3">
+                    <button onClick={() => setEmailModalOpen(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg w-full sm:w-auto">Cancel</button>
                     <button 
                         onClick={handleSendEmail} 
                         disabled={sending}
-                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 disabled:opacity-50"
+                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto"
                     >
                         {sending ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>} Send Now
                     </button>

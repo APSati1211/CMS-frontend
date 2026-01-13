@@ -83,27 +83,28 @@ export default function HomeManager() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto pb-20">
+    <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6">
       
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <div>
-            <h1 className="text-3xl font-bold text-slate-800">Home Page Manager</h1>
+        <div className="w-full md:w-auto">
+            {/* FIX: Added more letter spacing to prevent text from touching */}
+            <h1 className="text-3xl font-bold text-slate-800 tracking-widest">Home Page Manager</h1>
         </div>
-        <a href="/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline text-sm">View Live Site</a>
-      </div>
-
-      {/* TABS */}
-      <div className="flex overflow-x-auto gap-2 mb-8 bg-white p-2 rounded-xl shadow-sm border border-slate-200">
-        {tabs.map(tab => (
-            <button
-                key={tab.id}
-                onClick={() => { setActiveTab(tab.id); setEditingItem(null); setIsAddingNew(false); }}
-                className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition ${activeTab === tab.id ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
-            >
-                {tab.label}
-            </button>
-        ))}
+        <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-wrap gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+            {tabs.map(tab => (
+                <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setEditingItem(null); setIsAddingNew(false); }}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition ${activeTab === tab.id ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                    {tab.label}
+                </button>
+            ))}
+          </div>
+          
+        </div>
       </div>
 
       {/* --- TAB CONTENT --- */}
@@ -112,32 +113,6 @@ export default function HomeManager() {
       {activeTab === 'main' && (
         <form onSubmit={handleMainContentUpdate} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-8 animate-in fade-in">
             
-            {/* Hero Section */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Hero Section</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Title</label>
-                        <textarea name="hero_title" defaultValue={data.content.hero_title} className="w-full border p-3 rounded-xl font-bold text-lg" rows="2" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Subtitle</label>
-                        <textarea name="hero_subtitle" defaultValue={data.content.hero_subtitle} className="w-full border p-3 rounded-xl text-slate-600" rows="3" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">CTA Button Text</label>
-                        <input name="hero_cta_text" defaultValue={data.content.hero_cta_text} className="w-full border p-3 rounded-xl" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Image</label>
-                        <div className="flex items-center gap-4">
-                            {data.content.hero_image && <img src={data.content.hero_image} alt="Hero" className="h-16 w-16 object-cover rounded-lg border"/>}
-                            <input type="file" name="hero_image" className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Section Titles */}
             <div className="space-y-4">
                 <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Section Headings</h3>
@@ -330,7 +305,7 @@ const ListManager = ({ title, items, resource, fields, onDelete, onSave, editing
                         <h3 className="font-bold text-blue-700">{editingItem ? 'Edit Item' : 'Add New Item'}</h3>
                         <button type="button" onClick={() => { setEditingItem(null); setIsAddingNew(false); }} className="bg-white p-1 rounded-full hover:bg-slate-200"><X size={20}/></button>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {fields.map(field => (
                             <div key={field.name} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{field.label}</label>
@@ -357,7 +332,7 @@ const ListManager = ({ title, items, resource, fields, onDelete, onSave, editing
             )}
 
             {/* LIST DISPLAY */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map(item => (
                     <div key={item.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition group relative">
                         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white p-1 rounded-lg shadow-sm border">

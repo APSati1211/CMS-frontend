@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as LucideIcons from "lucide-react";
 import { 
   MapPin, Clock, Briefcase, X, CheckCircle, 
-  Loader2, ArrowRight, Filter, Search, ChevronRight, UploadCloud 
+  Loader2, ArrowRight, Filter, Search, ChevronRight, UploadCloud, Check
 } from "lucide-react";
 
 export default function Careers() {
@@ -64,9 +64,8 @@ export default function Careers() {
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden font-sans">
       
-      {/* 1. HERO SECTION - LIGHT THEME (MATCHING HOME) */}
+      {/* 1. HERO SECTION */}
       <div className="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-slate-50 text-slate-900 text-center px-6 overflow-hidden">
-        {/* Background Patterns */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')]"></div>
         <div className="absolute top-20 right-0 w-96 h-96 bg-blue-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob"></div>
         <div className="absolute bottom-0 left-20 w-80 h-80 bg-purple-200/50 rounded-full blur-3xl mix-blend-multiply animate-blob animation-delay-2000"></div>
@@ -218,7 +217,6 @@ export default function Careers() {
                                     <span className="flex items-center gap-1"><MapPin size={16} className="text-slate-400"/> {job.location}</span>
                                     <span className="flex items-center gap-1"><Clock size={16} className="text-slate-400"/> {job.type}</span>
                                 </div>
-                                {/* Short Description Preview */}
                                 <div className="text-slate-500 text-sm line-clamp-2 max-w-2xl" dangerouslySetInnerHTML={{ __html: job.description }}></div>
                             </div>
                             
@@ -260,6 +258,7 @@ export default function Careers() {
         isOpen={!!selectedJob} 
         mode={modalMode}
         setMode={setModalMode}
+        content={content}
         onClose={() => setSelectedJob(null)} 
       />
     </div>
@@ -267,7 +266,7 @@ export default function Careers() {
 }
 
 // --- UPDATED MODAL COMPONENT ---
-function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
+function ApplicationModal({ job, isOpen, mode, setMode, onClose, content }) {
   const [form, setForm] = useState({ 
       applicant_name: "", 
       email: "", 
@@ -275,7 +274,8 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
       linkedin_url: "", 
       resume_link: "", 
       resume_file: null, 
-      cover_letter: "" 
+      cover_letter: "",
+      referral_source: [] // Used as array for multi, string for single
   });
   const [status, setStatus] = useState("idle");
 
@@ -294,6 +294,12 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
       formData.append("resume_link", form.resume_link);
       formData.append("cover_letter", form.cover_letter);
       
+      // Handle Referral Source
+      const referralVal = Array.isArray(form.referral_source) 
+          ? form.referral_source.join(", ") 
+          : form.referral_source;
+      formData.append("referral_source", referralVal);
+
       if (form.resume_file) {
           formData.append("resume_file", form.resume_file);
       }
@@ -311,7 +317,8 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
               linkedin_url: "", 
               resume_link: "", 
               resume_file: null, 
-              cover_letter: "" 
+              cover_letter: "",
+              referral_source: []
           }); 
       }, 3000);
     } catch (error) {
@@ -323,6 +330,27 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
   const handleFileChange = (e) => {
       if (e.target.files && e.target.files[0]) {
           setForm({ ...form, resume_file: e.target.files[0] });
+      }
+  };
+
+  // --- Dynamic Referral Handler ---
+  const referralOptions = content?.referral_options ? content.referral_options.split(",").map(s => s.trim()) : [];
+  const isMulti = content?.is_referral_multiselect;
+
+  const handleReferralChange = (option) => {
+      if (isMulti) {
+          // Multi-Select (Checkbox) behavior
+          setForm(prev => {
+              const current = Array.isArray(prev.referral_source) ? prev.referral_source : [];
+              if (current.includes(option)) {
+                  return { ...prev, referral_source: current.filter(s => s !== option) };
+              } else {
+                  return { ...prev, referral_source: [...current, option] };
+              }
+          });
+      } else {
+          // Single-Select (Radio) behavior
+          setForm({ ...form, referral_source: [option] });
       }
   };
 
@@ -338,9 +366,9 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
           className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden max-h-[90vh] flex flex-col md:flex-row relative"
           onClick={e => e.stopPropagation()}
         >
-            {/* LEFT SIDE: JOB DETAILS (Modified to show Full Width in 'details' mode) */}
+            {/* LEFT SIDE: JOB DETAILS */}
             <div className={`
-                bg-slate-50 p-8 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 transition-all duration-300
+                bg-slate-50 p-8 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 transition-all duration-300 custom-scrollbar
                 ${mode === 'details' ? 'w-full' : 'hidden md:block md:w-1/2'} 
             `}>
                 <div className="sticky top-0 bg-slate-50 pb-4 z-10 flex justify-between items-start">
@@ -353,13 +381,9 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
                         </div>
                     </div>
 
-                    {/* CTA Button in Details Mode (Top Right) */}
                     {mode === 'details' && (
                         <div className="flex items-center gap-3">
-                            <button 
-                                onClick={() => setMode('apply')}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition flex items-center gap-2 active:scale-95"
-                            >
+                            <button onClick={() => setMode('apply')} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition flex items-center gap-2 active:scale-95">
                                 Apply Now <ChevronRight size={16} />
                             </button>
                             <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition text-slate-500">
@@ -372,9 +396,9 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
                 <div className="prose prose-slate prose-sm mt-4 text-slate-600 max-w-none" dangerouslySetInnerHTML={{ __html: job.description }} />
             </div>
 
-            {/* RIGHT SIDE: APPLICATION FORM (Modified Visibility) */}
+            {/* RIGHT SIDE: APPLICATION FORM */}
             <div className={`
-                p-8 overflow-y-auto bg-white transition-all duration-300
+                p-8 overflow-y-auto bg-white transition-all duration-300 custom-scrollbar
                 ${mode === 'apply' ? 'w-full md:w-1/2 block' : 'hidden'}
             `}>
                 <div className="flex justify-between items-center mb-6">
@@ -394,27 +418,28 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name *</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">{content?.form_name_label || "Full Name"} *</label>
                             <input required type="text" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                value={form.applicant_name} onChange={e => setForm({...form, applicant_name: e.target.value})} placeholder="John Doe" />
+                                value={form.applicant_name} onChange={e => setForm({...form, applicant_name: e.target.value})} />
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Email *</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">{content?.form_email_label || "Email"} *</label>
                                 <input required type="email" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                    value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="john@example.com" />
+                                    value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Phone</label>
-                                <input type="tel" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                    value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+91..." />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                    {content?.form_phone_label || "Phone"} {content?.is_phone_required ? "*" : "(Optional)"}
+                                </label>
+                                <input type="tel" required={content?.is_phone_required} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                    value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
                             </div>
                         </div>
 
-                        {/* --- FILE UPLOAD (MANDATORY) --- */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Resume (PDF) *</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">{content?.form_resume_label || "Resume (PDF)"} *</label>
                             <div className="relative">
                                 <input 
                                     required 
@@ -427,7 +452,6 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
                             </div>
                         </div>
 
-                        {/* --- LINK (OPTIONAL) --- */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Resume Link (Optional)</label>
                             <input type="url" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
@@ -435,16 +459,47 @@ function ApplicationModal({ job, isOpen, mode, setMode, onClose }) {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">LinkedIn URL</label>
-                            <input type="url" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                {content?.form_linkedin_label || "LinkedIn URL"} {content?.is_linkedin_required ? "*" : "(Optional)"}
+                            </label>
+                            <input type="url" required={content?.is_linkedin_required} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                                 value={form.linkedin_url} onChange={e => setForm({...form, linkedin_url: e.target.value})} placeholder="https://linkedin.com/in/..." />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Cover Letter</label>
-                            <textarea rows="4" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                value={form.cover_letter} onChange={e => setForm({...form, cover_letter: e.target.value})} placeholder="Why are you a good fit?"></textarea>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                {content?.form_cover_letter_label || "Cover Letter"} {content?.is_cover_letter_required ? "*" : "(Optional)"}
+                            </label>
+                            <textarea rows="4" required={content?.is_cover_letter_required} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                value={form.cover_letter} onChange={e => setForm({...form, cover_letter: e.target.value})}></textarea>
                         </div>
+
+                        {/* --- DYNAMIC REFERRAL FIELD --- */}
+                        {content?.show_referral_field && (
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_referral_label}</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {referralOptions.map(opt => {
+                                        const isSelected = Array.isArray(form.referral_source) && form.referral_source.includes(opt);
+                                        return (
+                                            <label key={opt} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer border transition ${isSelected ? 'bg-blue-100 border-blue-200' : 'bg-white border-transparent hover:bg-slate-200'}`}>
+                                                <div className={`w-4 h-4 flex items-center justify-center border rounded ${isSelected ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-300'} ${isMulti ? 'rounded' : 'rounded-full'}`}>
+                                                    {isSelected && <Check size={10} className="text-white" />}
+                                                </div>
+                                                <span className="text-sm text-slate-700">{opt}</span>
+                                                <input 
+                                                    type={isMulti ? "checkbox" : "radio"} 
+                                                    name="referral" 
+                                                    className="hidden" 
+                                                    checked={isSelected} 
+                                                    onChange={() => handleReferralChange(opt)} 
+                                                />
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {status === "error" && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center">

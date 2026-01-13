@@ -120,13 +120,6 @@ export default function ServicesManager() {
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">CTA Button Text</label>
                     <input name="cta_text" defaultValue={pageData?.hero?.cta_text} className="w-full border p-3 rounded-xl"/>
                 </div>
-                <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Image</label>
-                    <div className="flex items-center gap-4">
-                        {pageData?.hero?.image && <img src={pageData.hero.image} alt="Hero" className="h-16 w-16 object-cover rounded-lg border"/>}
-                        <input type="file" name="image" className="text-sm text-slate-500"/>
-                    </div>
-                </div>
                 <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 flex justify-center gap-2">
                     <Save size={18}/> Save Hero
                 </button>

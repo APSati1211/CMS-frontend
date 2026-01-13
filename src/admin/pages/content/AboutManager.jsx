@@ -107,27 +107,7 @@ export default function AboutManager() {
       {activeTab === 'main' && (
         <form onSubmit={handleMainContentUpdate} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-8 animate-in fade-in">
             
-            {/* Hero Section */}
-            <div className="space-y-4">
-                <h3 className="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><Layout size={18}/> Hero Section</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1">Hero Title</label>
-                        <input name="hero_title" defaultValue={content.hero_title || ''} className="w-full border p-3 rounded-xl font-bold" placeholder="e.g. About XpertAI"/>
-                    </div>
-                    <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1">Hero Subtitle</label>
-                        <textarea name="hero_subtitle" defaultValue={content.hero_subtitle || ''} className="w-full border p-3 rounded-xl" rows="2"/>
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1">Hero Image</label>
-                        <div className="flex items-center gap-4">
-                            {content.hero_image && <img src={content.hero_image} alt="Hero" className="h-20 w-32 object-cover rounded-lg border bg-slate-50"/>}
-                            <input type="file" name="hero_image" className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
 
             {/* Story Section */}
             <div className="space-y-4">

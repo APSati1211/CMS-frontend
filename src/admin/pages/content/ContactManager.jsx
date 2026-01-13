@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as API from '../../../api'; // Check path
 import { 
   Save, Plus, Trash2, Edit2, Loader2, X, 
-  MapPin, Layout, MessageSquare, Ticket, Mail 
+  MapPin, Layout, MessageSquare, Ticket, Mail, Settings 
 } from 'lucide-react';
 
 export default function ContactManager() {
@@ -10,7 +10,7 @@ export default function ContactManager() {
   const [messages, setMessages] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('layout'); // 'layout', 'addresses', 'messages', 'tickets'
+  const [activeTab, setActiveTab] = useState('layout'); // 'layout', 'addresses', 'messages', 'tickets', 'form_setup'
   
   // List Editing
   const [editingItem, setEditingItem] = useState(null);
@@ -27,8 +27,7 @@ export default function ContactManager() {
         const pageRes = await API.getContactPageData();
         setData(pageRes.data);
 
-        // Fetch Messages & Tickets (Admin Only)
-        // Ensure you have these GET functions in your API file pointing to 'contact/messages/' and 'contact/tickets/'
+        // Fetch Messages & Tickets
         const msgRes = await API.fetchList('contact/messages'); 
         const tktRes = await API.fetchList('contact/tickets');
         
@@ -41,16 +40,22 @@ export default function ContactManager() {
     setLoading(false);
   };
 
-  // --- 1. SINGLETON UPDATE (Hero & Map) ---
+  // --- 1. SINGLETON UPDATE (Hero, Map, Form Settings) ---
   const handlePageUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    // Note: Adjust endpoint prefix if needed based on your API setup
+    
+    // Handle Checkbox explicitly: FormData ignores unchecked boxes
+    // We check if the element exists in the form to avoid overwriting unrelated updates
+    if (e.target.elements['is_sub_service_multiselect']) {
+        formData.set('is_sub_service_multiselect', e.target.elements['is_sub_service_multiselect'].checked);
+    }
+
     const id = data?.content?.id || 1;
     
     try {
         await API.updateItem('contact/contact-content', id, formData);
-        alert("Page Content Updated!");
+        alert("Settings Updated!");
         loadAll();
     } catch (err) {
         alert("Failed to update.");
@@ -92,6 +97,7 @@ export default function ContactManager() {
       { id: 'addresses', label: 'Addresses', icon: MapPin },
       { id: 'messages', label: 'Messages', icon: Mail },
       { id: 'tickets', label: 'Support Tickets', icon: Ticket },
+      { id: 'form_setup', label: 'Edit Contact Form', icon: Settings }, // New Tab
   ];
 
   return (
@@ -116,7 +122,7 @@ export default function ContactManager() {
       {/* --- TAB 1: PAGE LAYOUT --- */}
       {activeTab === 'layout' && (
         <form onSubmit={handlePageUpdate} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6 animate-in fade-in">
-            <h3 className="font-bold text-lg border-b pb-2">Hero & Content</h3>
+            <h3 className="font-bold text-lg border-b pb-2">Hero & Static Content</h3>
             <div className="grid md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Title</label>
@@ -126,13 +132,14 @@ export default function ContactManager() {
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Subtitle</label>
                     <input name="hero_subtitle" defaultValue={data?.content?.hero_subtitle} className="w-full border p-3 rounded-xl"/>
                 </div>
-                <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Form Title</label>
-                    <input name="form_title" defaultValue={data?.content?.form_title} className="w-full border p-3 rounded-xl"/>
-                </div>
+                {/* Note: Form Title moved to Form Setup tab */}
                 <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Support Title</label>
                     <input name="support_title" defaultValue={data?.content?.support_title} className="w-full border p-3 rounded-xl"/>
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Support Text</label>
+                    <input name="support_text" defaultValue={data?.content?.support_text} className="w-full border p-3 rounded-xl"/>
                 </div>
                 <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Google Maps Embed URL (src only)</label>
@@ -165,7 +172,7 @@ export default function ContactManager() {
         />
       )}
 
-      {/* --- TAB 3: MESSAGES (READ ONLY) --- */}
+      {/* --- TAB 3: MESSAGES --- */}
       {activeTab === 'messages' && (
         <div className="space-y-4 animate-in fade-in">
             <h2 className="text-xl font-bold">Inbox ({messages.length})</h2>
@@ -225,7 +232,6 @@ export default function ContactManager() {
                             <select 
                                 defaultValue={ticket.status} 
                                 onChange={(e) => {
-                                    // Direct update call for status change
                                     const formData = new FormData();
                                     formData.append('status', e.target.value);
                                     API.updateItem('contact/tickets', ticket.id, formData).then(() => {
@@ -250,6 +256,84 @@ export default function ContactManager() {
                 ))}
             </div>
         </div>
+      )}
+
+      {/* --- TAB 5: FORM SETUP (NEW) --- */}
+      {activeTab === 'form_setup' && (
+        <form onSubmit={handlePageUpdate} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-8 animate-in fade-in">
+            {/* General Configuration */}
+            <div>
+                <h3 className="font-bold text-lg border-b pb-2 mb-4 flex items-center gap-2">
+                    <Settings size={20} className="text-slate-400"/> General Configuration
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Form Heading</label>
+                        <input name="form_title" defaultValue={data?.content?.form_title} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Submit Button Text</label>
+                        <input name="form_button_text" defaultValue={data?.content?.form_button_text} className="w-full border p-3 rounded-xl" placeholder="e.g. Request Consultation"/>
+                    </div>
+                    <div className="md:col-span-2 flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <input 
+                            type="checkbox" 
+                            name="is_sub_service_multiselect" 
+                            id="multiSelectToggle"
+                            defaultChecked={data?.content?.is_sub_service_multiselect} 
+                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                        />
+                        <label htmlFor="multiSelectToggle" className="cursor-pointer">
+                            <span className="block font-bold text-slate-700">Enable Sub-Service Multi-Select</span>
+                            <span className="block text-xs text-slate-500">If unchecked, users can only select ONE specific requirement.</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {/* Label Customization */}
+            <div>
+                <h3 className="font-bold text-lg border-b pb-2 mb-4 flex items-center gap-2">
+                    <Edit2 size={20} className="text-slate-400"/> Field Labels
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Name Label</label>
+                        <input name="form_name_label" defaultValue={data?.content?.form_name_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Company Label</label>
+                        <input name="form_company_label" defaultValue={data?.content?.form_company_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email Label</label>
+                        <input name="form_email_label" defaultValue={data?.content?.form_email_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Phone Label</label>
+                        <input name="form_phone_label" defaultValue={data?.content?.form_phone_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Service Dropdown Label</label>
+                        <input name="form_service_label" defaultValue={data?.content?.form_service_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Timeline Label</label>
+                        <input name="form_timeline_label" defaultValue={data?.content?.form_timeline_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Message Label</label>
+                        <input name="form_message_label" defaultValue={data?.content?.form_message_label} className="w-full border p-3 rounded-xl"/>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+                <button className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-800 flex items-center gap-2 shadow-lg">
+                    <Save size={18}/> Update Form Settings
+                </button>
+            </div>
+        </form>
       )}
 
     </div>

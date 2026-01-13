@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, MapPin, Send, MessageSquare, Ticket, LifeBuoy, X, Check, Loader2, ChevronDown } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, Ticket, LifeBuoy, X, Check, Loader2, ChevronDown, Circle } from "lucide-react";
 import { getContactPageData, submitLead, submitTicket, getServices } from "../api"; 
 import { useChat } from "../context/ChatContext"; 
-import { useLocation } from "react-router-dom"; // 👈 IMPORT THIS
+import { useLocation } from "react-router-dom";
 
 export default function Contact() {
   const { openChat } = useChat();
-  const location = useLocation(); // 👈 HOOK TO READ URL
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [servicesList, setServicesList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,15 @@ export default function Contact() {
   };
 
   const handleSubServiceChange = (subServiceTitle) => {
+    const isMulti = data?.content?.is_sub_service_multiselect ?? true; // Default to true if undefined
+
     setForm(prev => {
+        if (!isMulti) {
+            // Single Select Mode: Replace array with just this item
+            return { ...prev, sub_services: [subServiceTitle] };
+        }
+        
+        // Multi Select Mode
         const exists = prev.sub_services.includes(subServiceTitle);
         if (exists) return { ...prev, sub_services: prev.sub_services.filter(s => s !== subServiceTitle) };
         return { ...prev, sub_services: [...prev.sub_services, subServiceTitle] };
@@ -69,6 +77,7 @@ export default function Contact() {
 
   const { content, addresses } = data || {};
   const selectedServiceObj = servicesList.find(s => s.title === form.service);
+  const isMultiSelect = content?.is_sub_service_multiselect ?? true;
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -110,27 +119,27 @@ export default function Contact() {
                 <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid md:grid-cols-2 gap-4 md:gap-5">
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Name *</label>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_name_label || "Name"} *</label>
                             <input type="text" name="name" required placeholder="John Doe" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition text-base" value={form.name} onChange={handleChange} />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Company</label>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_company_label || "Company"}</label>
                             <input type="text" name="company" placeholder="Business Name" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition text-base" value={form.company} onChange={handleChange} />
                         </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4 md:gap-5">
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Email *</label>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_email_label || "Email"} *</label>
                             <input type="email" name="email" required placeholder="john@example.com" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition text-base" value={form.email} onChange={handleChange} />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Phone *</label>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_phone_label || "Phone"} *</label>
                             <input type="tel" name="phone" required placeholder="+91 98765 43210" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition text-base" value={form.phone} onChange={handleChange} />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">I am interested in... *</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_service_label || "I am interested in..."} *</label>
                         <div className="relative">
                             <select name="service" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 appearance-none text-base text-slate-600 cursor-pointer" value={form.service} onChange={handleServiceChange}>
                                 <option value="">Select a Service Category</option>
@@ -145,24 +154,37 @@ export default function Contact() {
                     <AnimatePresence>
                         {form.service && selectedServiceObj && selectedServiceObj.sub_services.length > 0 && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                <label className="block text-sm font-bold text-slate-700 mb-2">Specific Requirements</label>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">
+                                    Specific Requirements {isMultiSelect ? "(Select Multiple)" : "(Select One)"}
+                                </label>
                                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl max-h-60 overflow-y-auto space-y-2 custom-scrollbar">
-                                    {selectedServiceObj.sub_services.map((sub) => (
-                                        <label key={sub.id} className={`flex items-start gap-3 cursor-pointer p-2.5 rounded-lg transition border ${form.sub_services.includes(sub.title) ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50 border-transparent'}`}>
-                                            <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors ${form.sub_services.includes(sub.title) ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}`}>
-                                                {form.sub_services.includes(sub.title) && <Check size={14} className="text-white" />}
-                                            </div>
-                                            <input type="checkbox" className="hidden" checked={form.sub_services.includes(sub.title)} onChange={() => handleSubServiceChange(sub.title)} />
-                                            <span className={`text-sm leading-snug ${form.sub_services.includes(sub.title) ? 'text-blue-800 font-medium' : 'text-slate-600'}`}>{sub.title}</span>
-                                        </label>
-                                    ))}
+                                    {selectedServiceObj.sub_services.map((sub) => {
+                                        const isSelected = form.sub_services.includes(sub.title);
+                                        return (
+                                            <label key={sub.id} className={`flex items-start gap-3 cursor-pointer p-2.5 rounded-lg transition border ${isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50 border-transparent'}`}>
+                                                <div className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}`}>
+                                                    {isSelected && (
+                                                        isMultiSelect ? <Check size={14} className="text-white" /> : <div className="w-2 h-2 bg-white rounded-full" />
+                                                    )}
+                                                </div>
+                                                {/* Hidden input manages state via onChange on label wrapper implicitly or explicit handler */}
+                                                <input 
+                                                    type={isMultiSelect ? "checkbox" : "radio"} 
+                                                    className="hidden" 
+                                                    checked={isSelected} 
+                                                    onChange={() => handleSubServiceChange(sub.title)} 
+                                                />
+                                                <span className={`text-sm leading-snug ${isSelected ? 'text-blue-800 font-medium' : 'text-slate-600'}`}>{sub.title}</span>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Timeline *</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_timeline_label || "Timeline"} *</label>
                         <div className="relative">
                             <select name="timeline" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 appearance-none text-base text-slate-600 cursor-pointer" value={form.timeline} onChange={handleChange}>
                                 <option value="">Select Timeline</option>
@@ -176,12 +198,12 @@ export default function Contact() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{content?.form_message_label || "Message"}</label>
                         <textarea name="message" rows="3" placeholder="Details..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition resize-none text-base" value={form.message} onChange={handleChange}></textarea>
                     </div>
 
                     <button type="submit" disabled={status === "sending"} className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg flex justify-center items-center gap-2 active:scale-95">
-                        {status === "sending" ? <Loader2 className="animate-spin" /> : "Request Consultation"}
+                        {status === "sending" ? <Loader2 className="animate-spin" /> : (content?.form_button_text || "Request Consultation")}
                     </button>
                     
                     {status === "success" && <div className="p-4 bg-green-50 text-green-700 rounded-xl text-center font-medium border border-green-200">Message Sent!</div>}
