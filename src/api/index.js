@@ -8,19 +8,19 @@ function getCookie(name) {
 }
 
 // --- CONFIGURATION ---
-const LOCAL_API_URL = "http://localhost:8000/api"; 
-const BASE_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) 
-    ? process.env.REACT_APP_API_URL 
-    : LOCAL_API_URL;
+// Step 1: .env se URL fetch karna. Agar .env mein nahi hai to localhost use karega.
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
+
+console.log("Current API Base URL:", BASE_URL); // Debugging ke liye check kar sakte ho
 
 const API = axios.create({
-    baseURL: BASE_URL, 
-    withCredentials: true, 
+    baseURL: BASE_URL,
+    withCredentials: true,
 });
 
 // Attach CSRF token & Auth Token
 API.interceptors.request.use((config) => {
-  const csrftoken = getCookie('csrftoken'); 
+  const csrftoken = getCookie('csrftoken');
   if (csrftoken) config.headers['X-CSRFToken'] = csrftoken;
   
   const token = localStorage.getItem('authToken');
@@ -56,7 +56,6 @@ export const updateProfile = (data) => API.put("profile/", data, configMultipart
 export const fetchList = (resource) => API.get(`${resource}/`);
 
 export const createItem = (resource, data) => {
-    // Handling namespaced apps
     if (['team-members', 'awards', 'tech-stack'].includes(resource)) {
         return API.post(`about/${resource}/`, data, configMultipart);
     }
@@ -122,16 +121,14 @@ export const updateLegalPageData = (slug, data) => API.put(`legal/pages/${slug}/
 
 
 // ==========================================
-//  2. CONTACT & TICKETS (UPDATED)
+//  2. CONTACT & TICKETS
 // ==========================================
 export const getContactPageData = () => API.get("contact/page-data/");
 export const updateContactPageData = (id, data) => API.put(`contact/contact-content/${id}/`, data, configMultipart);
 
-// Public Forms
 export const sendContact = (data) => API.post("contact/", data);
 export const submitTicket = (data) => API.post("contact/tickets/", data);
 
-// Admin Lists
 export const getContactMessages = () => API.get("contact/messages/");
 export const deleteContact = (id) => API.delete(`contact/messages/${id}/`);
 
