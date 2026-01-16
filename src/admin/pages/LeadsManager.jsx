@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import * as API from '../../api'; 
 import { 
-  Loader2, Trash2, Search, Download, 
+  Trash2, Search, Download, 
   MessageCircle, Mail, Share2, CheckSquare, Square, X, 
   FileSpreadsheet, Copy, Users, TrendingUp, 
   AlertCircle, CheckCircle2, ArrowUpDown,
@@ -113,7 +113,7 @@ const Toast = ({ message, type, onClose }) => {
     <div className={`fixed bottom-6 right-6 z-[100] flex items-center gap-4 px-6 py-4 rounded-xl border shadow-xl shadow-slate-200/50 animate-in slide-in-from-right-10 fade-in duration-300 ${bgClass} min-w-[300px] max-w-[90vw]`}>
       <Icon size={24} className="shrink-0"/>
       <div className="flex-1 font-medium text-sm">{message}</div>
-      <button onClick={onClose} className="ml-2 opacity-50 hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-black/5"><X size={16}/></button>
+      <button type="button" onClick={onClose} className="ml-2 opacity-50 hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-black/5"><X size={16}/></button>
     </div>
   );
 };
@@ -136,13 +136,14 @@ const StatusDropdown = ({ currentStatus, onChange }) => {
     
     return (
         <div className="relative group/status">
-            <button className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wide transition-all ${activeConfig.color}`}>
+            <button type="button" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wide transition-all ${activeConfig.color}`}>
                 {activeConfig.label}
                 <ChevronDown size={12} className="opacity-50"/>
             </button>
             <div className="absolute right-0 top-full mt-2 w-32 bg-white rounded-xl shadow-xl border border-slate-100 p-1 hidden group-hover/status:block z-50 animate-in fade-in zoom-in-95 duration-200">
                 {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                     <button
+                        type="button"
                         key={key}
                         onClick={(e) => { e.stopPropagation(); onChange(key); }}
                         className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold uppercase mb-0.5 last:mb-0 transition-colors ${
@@ -203,10 +204,15 @@ export default function LeadsManager() {
     data: null    
   });
 
-  // --- EFFECTS ---
-  useEffect(() => { fetchLeads(); }, []);
+  // --- ACTIONS ---
+  const addToast = useCallback((message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  }, []);
 
-  const fetchLeads = async () => {
+  const removeToast = useCallback((id) => setToasts(prev => prev.filter(t => t.id !== id)), []);
+
+  const fetchLeads = useCallback(async () => {
     setLoading(true);
     try {
       const res = await API.getLeads();
@@ -217,14 +223,12 @@ export default function LeadsManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [addToast]);
 
-  const addToast = useCallback((message, type = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-  }, []);
-
-  const removeToast = useCallback((id) => setToasts(prev => prev.filter(t => t.id !== id)), []);
+  // --- EFFECTS ---
+  useEffect(() => { 
+    fetchLeads(); 
+  }, [fetchLeads]);
 
   // --- FILTERING ---
   const processedLeads = useMemo(() => {
@@ -247,7 +251,6 @@ export default function LeadsManager() {
     return result;
   }, [leads, filterType, searchQuery, sortConfig]);
 
-  // --- ACTIONS ---
   const handleSort = (key) => setSortConfig(prev => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }));
 
   const handleDelete = async (e, id) => {
@@ -282,7 +285,6 @@ export default function LeadsManager() {
           // 3. Create FormData with ALL fields to satisfy PUT requirements
           const formData = new FormData();
           formData.append('name', currentLead.name);
-          // Handle optional fields carefully
           formData.append('email', currentLead.email || '');
           formData.append('phone', currentLead.phone || '');
           formData.append('company', currentLead.company || '');
@@ -291,7 +293,6 @@ export default function LeadsManager() {
           formData.append('timeline', currentLead.timeline || '');
           formData.append('message', currentLead.message || '');
           formData.append('source', currentLead.source || 'website');
-          // Update the status
           formData.append('status', newStatus);
 
           // 4. Send PUT request
@@ -380,10 +381,10 @@ export default function LeadsManager() {
             <p className="text-slate-500 mt-1 text-sm sm:text-base font-medium">View, track, and distribute incoming client inquiries.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full">
-             <button onClick={fetchLeads} className="w-full sm:w-auto bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2 justify-center">
+             <button type="button" onClick={fetchLeads} className="w-full sm:w-auto bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2 justify-center">
                 <ArrowUpDown size={16} className="text-slate-400"/> Refresh
              </button>
-             <button onClick={() => { selectAllVisible(); if(leads.length>0) setActionModal({open:true, type:'bulk'}); }} className="w-full sm:w-auto bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition flex items-center gap-2 transform active:scale-95 justify-center">
+             <button type="button" onClick={() => { selectAllVisible(); if(leads.length>0) setActionModal({open:true, type:'bulk'}); }} className="w-full sm:w-auto bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition flex items-center gap-2 transform active:scale-95 justify-center">
                 <Download size={18}/> Export All
              </button>
           </div>
@@ -405,7 +406,7 @@ export default function LeadsManager() {
           </div>
           <div className="flex items-center gap-2 w-full overflow-x-auto pb-2 hide-scrollbar">
             {['all', 'chatbot', 'website'].map(type => (
-              <button key={type} onClick={() => setFilterType(type)} className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 ${filterType === type ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
+              <button key={type} type="button" onClick={() => setFilterType(type)} className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 ${filterType === type ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
                 {type === 'all' && <Layers size={14}/>}{type === 'chatbot' && <MessageCircle size={14}/>}{type === 'website' && <ExternalLink size={14}/>}
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </button>
@@ -421,14 +422,14 @@ export default function LeadsManager() {
                     <span className="text-sm font-medium text-slate-300 hidden sm:inline">Selected</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setActionModal({open:true, type:'bulk'})} className="flex items-center gap-2 hover:bg-white/10 px-3 py-2 rounded-lg transition font-bold text-sm">
+                    <button type="button" onClick={() => setActionModal({open:true, type:'bulk'})} className="flex items-center gap-2 hover:bg-white/10 px-3 py-2 rounded-lg transition font-bold text-sm">
                         <Share2 size={16} className="text-indigo-400"/> <span className="hidden sm:inline">Share / Export</span>
                     </button>
-                    <button onClick={() => { if(window.confirm("Delete selected?")) { selectedLeads.forEach(id => handleDelete({stopPropagation:()=>{}}, id)); } }} className="flex items-center gap-2 hover:bg-red-500/20 px-3 py-2 rounded-lg transition font-bold text-sm text-red-400 hover:text-red-300">
+                    <button type="button" onClick={() => { if(window.confirm("Delete selected?")) { selectedLeads.forEach(id => handleDelete({stopPropagation:()=>{}}, id)); } }} className="flex items-center gap-2 hover:bg-red-500/20 px-3 py-2 rounded-lg transition font-bold text-sm text-red-400 hover:text-red-300">
                         <Trash2 size={16}/> <span className="hidden sm:inline">Delete</span>
                     </button>
                 </div>
-                <button onClick={() => setSelectedLeads([])} className="ml-2 hover:bg-white/10 p-1.5 rounded-full transition"><X size={16}/></button>
+                <button type="button" onClick={() => setSelectedLeads([])} className="ml-2 hover:bg-white/10 p-1.5 rounded-full transition"><X size={16}/></button>
             </div>
         )}
 
@@ -441,15 +442,23 @@ export default function LeadsManager() {
                             <thead className="bg-slate-50/50 border-b border-slate-100 sticky top-0 z-10 backdrop-blur-sm">
                                 <tr>
                                     <th className="p-5 w-16 text-center">
-                                        <button onClick={selectAllVisible} className="text-slate-400 hover:text-indigo-600 transition">
+                                        <button type="button" onClick={selectAllVisible} className="text-slate-400 hover:text-indigo-600 transition">
                                             {selectedLeads.length > 0 && processedLeads.every(l => selectedLeads.includes(l.id)) ? <CheckSquare size={20}/> : <Square size={20}/>}
                                         </button>
                                     </th>
-                                    <th className="p-5 font-bold text-slate-700">Lead Profile</th>
+                                    <th className="p-5 font-bold text-slate-700 cursor-pointer hover:text-indigo-600 transition" onClick={() => handleSort('name')}>
+                                        <div className="flex items-center gap-2">Lead Profile <ArrowUpDown size={14} className="opacity-40"/></div>
+                                    </th>
                                     <th className="p-5 font-bold text-slate-700">Contact Info</th>
-                                    <th className="p-5 font-bold text-slate-700">Status</th>
-                                    <th className="p-5 font-bold text-slate-700">Source</th>
-                                    <th className="p-5 font-bold text-slate-700">Date</th>
+                                    <th className="p-5 font-bold text-slate-700 cursor-pointer hover:text-indigo-600 transition" onClick={() => handleSort('status')}>
+                                         <div className="flex items-center gap-2">Status <ArrowUpDown size={14} className="opacity-40"/></div>
+                                    </th>
+                                    <th className="p-5 font-bold text-slate-700 cursor-pointer hover:text-indigo-600 transition" onClick={() => handleSort('source')}>
+                                         <div className="flex items-center gap-2">Source <ArrowUpDown size={14} className="opacity-40"/></div>
+                                    </th>
+                                    <th className="p-5 font-bold text-slate-700 cursor-pointer hover:text-indigo-600 transition" onClick={() => handleSort('created_at')}>
+                                         <div className="flex items-center gap-2">Date <ArrowUpDown size={14} className="opacity-40"/></div>
+                                    </th>
                                     <th className="p-5 text-center font-bold text-slate-700">Actions</th>
                                 </tr>
                             </thead>
@@ -459,7 +468,7 @@ export default function LeadsManager() {
                                 ) : processedLeads.map((lead) => (
                                     <tr key={lead.id} onClick={() => { setLeadDetail(lead); setDetailModalOpen(true); }} className={`group hover:bg-slate-50/80 transition cursor-pointer ${selectedLeads.includes(lead.id) ? 'bg-indigo-50/40' : ''}`}>
                                         <td className="p-5 text-center" onClick={(e) => e.stopPropagation()}>
-                                            <button onClick={() => toggleSelection(lead.id)} className={`transition ${selectedLeads.includes(lead.id) ? 'text-indigo-600 scale-110' : 'text-slate-300 group-hover:text-slate-400'}`}>
+                                            <button type="button" onClick={() => toggleSelection(lead.id)} className={`transition ${selectedLeads.includes(lead.id) ? 'text-indigo-600 scale-110' : 'text-slate-300 group-hover:text-slate-400'}`}>
                                                 {selectedLeads.includes(lead.id) ? <CheckSquare size={20}/> : <Square size={20}/>}
                                             </button>
                                         </td>
@@ -483,8 +492,8 @@ export default function LeadsManager() {
                                         <td className="p-5 text-xs font-bold text-slate-500">{formatDate(lead.created_at)}<div className="text-[10px] font-medium text-slate-400 mt-0.5">{formatTime(lead.created_at)}</div></td>
                                         <td className="p-5" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0">
-                                                <button onClick={(e) => { e.stopPropagation(); setActionModal({open:true, type:'single', data:lead}); }} className="p-2 hover:bg-indigo-50 rounded-xl text-slate-400 hover:text-indigo-600 transition" title="Quick Share"><Share2 size={18}/></button>
-                                                <button onClick={(e) => handleDelete(e, lead.id)} className="p-2 hover:bg-red-50 rounded-xl text-slate-400 hover:text-red-600 transition" title="Delete"><Trash2 size={18}/></button>
+                                                <button type="button" onClick={(e) => { e.stopPropagation(); setActionModal({open:true, type:'single', data:lead}); }} className="p-2 hover:bg-indigo-50 rounded-xl text-slate-400 hover:text-indigo-600 transition" title="Quick Share"><Share2 size={18}/></button>
+                                                <button type="button" onClick={(e) => handleDelete(e, lead.id)} className="p-2 hover:bg-red-50 rounded-xl text-slate-400 hover:text-red-600 transition" title="Delete"><Trash2 size={18}/></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -510,6 +519,7 @@ export default function LeadsManager() {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <button 
+                                            type="button"
                                             onClick={(e) => { e.stopPropagation(); toggleSelection(lead.id); }} 
                                             className={`transition ${selectedLeads.includes(lead.id) ? 'text-indigo-600' : 'text-slate-300'}`}
                                         >
@@ -526,6 +536,7 @@ export default function LeadsManager() {
                                         </div>
                                     </div>
                                     <button 
+                                        type="button"
                                         onClick={(e) => { e.stopPropagation(); setActionModal({open:true, type:'single', data:lead}); }}
                                         className="p-2 bg-indigo-50 rounded-xl text-indigo-600"
                                     >
@@ -554,6 +565,7 @@ export default function LeadsManager() {
                                 <div className="border-t border-slate-50 pt-3 flex justify-between items-center" onClick={e => e.stopPropagation()}>
                                     <StatusDropdown currentStatus={lead.status || 'new'} onChange={(newStatus) => handleStatusUpdate(lead.id, newStatus)}/>
                                     <button 
+                                        type="button"
                                         onClick={(e) => handleDelete(e, lead.id)}
                                         className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"
                                     >
@@ -587,7 +599,7 @@ export default function LeadsManager() {
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setDetailModalOpen(false)} className="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition relative z-10"><X size={20}/></button>
+                    <button type="button" onClick={() => setDetailModalOpen(false)} className="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition relative z-10"><X size={20}/></button>
                 </div>
                 <div className="p-8 overflow-y-auto custom-scrollbar bg-slate-50/50">
                     <div className="grid grid-cols-1 gap-8">
@@ -626,18 +638,18 @@ export default function LeadsManager() {
                     </div>
                 </div>
                 <div className="bg-white p-6 border-t border-slate-100 flex justify-end gap-3">
-                    <button onClick={() => { setDetailModalOpen(false); handleDelete({ stopPropagation: ()=>{} }, leadDetail.id); }} className="bg-white border border-red-100 text-red-500 px-5 py-3 rounded-xl font-bold hover:bg-red-50 transition flex items-center gap-2"><Trash2 size={18}/> Delete</button>
-                    <button onClick={() => { setDetailModalOpen(false); setActionModal({open:true, type:'single', data:leadDetail}); }} className="bg-slate-900 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-slate-800 font-bold shadow-lg transition"><Share2 size={18}/> Share Lead</button>
+                    <button type="button" onClick={() => { setDetailModalOpen(false); handleDelete({ stopPropagation: ()=>{} }, leadDetail.id); }} className="bg-white border border-red-100 text-red-500 px-5 py-3 rounded-xl font-bold hover:bg-red-50 transition flex items-center gap-2"><Trash2 size={18}/> Delete</button>
+                    <button type="button" onClick={() => { setDetailModalOpen(false); setActionModal({open:true, type:'single', data:leadDetail}); }} className="bg-slate-900 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-slate-800 font-bold shadow-lg transition"><Share2 size={18}/> Share Lead</button>
                 </div>
             </div>
         </div>
       )}
 
-      {/* MODAL 2: UNIFIED SHARE (Bulk & Single) - Reused Code Block */}
+      {/* MODAL 2: UNIFIED SHARE (Bulk & Single) */}
       {actionModal.open && (
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
             <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden relative border border-slate-100">
-                <button onClick={() => setActionModal({...actionModal, open:false})} className="absolute top-5 right-5 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition z-10 text-slate-500"><X size={20}/></button>
+                <button type="button" onClick={() => setActionModal({...actionModal, open:false})} className="absolute top-5 right-5 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition z-10 text-slate-500"><X size={20}/></button>
                 <div className="p-8 text-center">
                     <div className="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-indigo-100">
                         {actionModal.type === 'bulk' ? <FileSpreadsheet size={40}/> : <FileText size={40}/>}
@@ -650,21 +662,21 @@ export default function LeadsManager() {
                         }
                     </p>
                     <div className="grid grid-cols-1 gap-3">
-                        <button onClick={() => handleShareAction('whatsapp')} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-green-100 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-200 font-bold transition group">
+                        <button type="button" onClick={() => handleShareAction('whatsapp')} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-green-100 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-200 font-bold transition group">
                             <MessageCircle size={22} className="group-hover:scale-110 transition-transform"/> Share via WhatsApp
                         </button>
-                        <button onClick={() => handleShareAction('email')} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 font-bold transition group">
+                        <button type="button" onClick={() => handleShareAction('email')} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 font-bold transition group">
                             <Mail size={22} className="group-hover:scale-110 transition-transform"/> Share via Email
                         </button>
                         {actionModal.type === 'single' && (
-                            <button onClick={() => handleShareAction('copy')} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-200 font-bold transition group">
+                            <button type="button" onClick={() => handleShareAction('copy')} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-200 font-bold transition group">
                                 <Copy size={22} className="group-hover:scale-110 transition-transform"/> Copy to Clipboard
                             </button>
                         )}
                         {actionModal.type === 'bulk' && (
                             <>
                                 <div className="my-2 text-xs font-bold text-slate-300 uppercase tracking-widest">Or</div>
-                                <button onClick={() => { downloadCSV(leads.filter(l => selectedLeads.includes(l.id))); addToast("File downloaded successfully!"); }} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-slate-100 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-bold transition group shadow-sm">
+                                <button type="button" onClick={() => { downloadCSV(leads.filter(l => selectedLeads.includes(l.id))); addToast("File downloaded successfully!"); }} className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-slate-100 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-bold transition group shadow-sm">
                                     <Download size={20}/> Download File Only
                                 </button>
                             </>

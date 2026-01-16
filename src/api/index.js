@@ -7,20 +7,45 @@ function getCookie(name) {
   return match ? decodeURIComponent(match.pop()) : null;
 }
 
-// --- CONFIGURATION ---
-// Step 1: .env se URL fetch karna. Agar .env mein nahi hai to localhost use karega.
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
+// ==========================================
+// 🌐 DYNAMIC CONFIGURATION (AWS / LOCAL)
+// ==========================================
+const getBaseUrl = () => {
+  // 1. Check if a specific URL is forced via Environment Variable
+  // (Only used if you explicitly set it in .env.production)
+  if (process.env.REACT_APP_API_URL) {
+    // Fix: Ensure /api is appended if missing
+    return process.env.REACT_APP_API_URL.endsWith('/api') 
+      ? process.env.REACT_APP_API_URL 
+      : `${process.env.REACT_APP_API_URL}/api`;
+  }
 
-console.log("Current API Base URL:", BASE_URL); // Debugging ke liye check kar sakte ho
+  // 2. Dynamic IP Detection (Crucial for AWS)
+  // If the browser URL is NOT localhost, assume backend is on the same Server IP
+  if (typeof window !== 'undefined') {
+    const { hostname, protocol } = window.location;
+    
+    // If we are on AWS (e.g., 54.241.x.x), point API to http://54.241.x.x:8000/api
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+       return `${protocol}//${hostname}:8000/api`;
+    }
+  }
+
+  // 3. Fallback: Local Development
+  return "http://localhost:8000/api";
+};
+
+const BASE_URL = getBaseUrl();
+console.log("✅ API Base URL:", BASE_URL); // Verify this matches your AWS IP in the console
 
 const API = axios.create({
-    baseURL: BASE_URL,
-    withCredentials: true,
+  baseURL: BASE_URL, 
+  withCredentials: true, 
 });
 
-// Attach CSRF token & Auth Token
+// Attach CSRF & Auth Tokens
 API.interceptors.request.use((config) => {
-  const csrftoken = getCookie('csrftoken');
+  const csrftoken = getCookie('csrftoken'); 
   if (csrftoken) config.headers['X-CSRFToken'] = csrftoken;
   
   const token = localStorage.getItem('authToken');
@@ -31,12 +56,14 @@ API.interceptors.request.use((config) => {
 
 const configMultipart = { headers: { "Content-Type": "multipart/form-data" } };
 
-
 // ==========================================
-//  🔐 AUTHENTICATION
+// 🔐 AUTHENTICATION
 // ==========================================
 export const loginUser = (credentials) => API.post("login/", credentials);
 export const registerUser = (data) => API.post("register/", data);
+export const getSystemStatus = () => API.get("system-status/");
+export const setupAdmin = (data) => API.post("setup-admin/", data);
+
 export const setAuthToken = (token) => {
   if (token) {
     API.defaults.headers.common['Authorization'] = `Token ${token}`;
@@ -49,50 +76,33 @@ export const setAuthToken = (token) => {
 export const getProfile = () => API.get("profile/");
 export const updateProfile = (data) => API.put("profile/", data, configMultipart);
 
-
 // ==========================================
-//  🛠️ GENERIC CRUD
+// 🛠️ GENERIC CRUD
 // ==========================================
 export const fetchList = (resource) => API.get(`${resource}/`);
 
 export const createItem = (resource, data) => {
-    if (['team-members', 'awards', 'tech-stack'].includes(resource)) {
-        return API.post(`about/${resource}/`, data, configMultipart);
-    }
-    if (['office-addresses', 'messages', 'tickets'].includes(resource)) {
-        return API.post(`contact/${resource}/`, data, configMultipart);
-    }
-    return API.post(`${resource}/`, data, configMultipart);
+  if (['team-members', 'awards', 'tech-stack'].includes(resource)) return API.post(`about/${resource}/`, data, configMultipart);
+  if (['office-addresses', 'messages', 'tickets'].includes(resource)) return API.post(`contact/${resource}/`, data, configMultipart);
+  return API.post(`${resource}/`, data, configMultipart);
 };
 
 export const updateItem = (resource, id, data) => {
-    if (['team-members', 'awards', 'tech-stack'].includes(resource)) {
-        return API.put(`about/${resource}/${id}/`, data, configMultipart);
-    }
-    if (['office-addresses', 'messages', 'tickets'].includes(resource)) {
-        return API.put(`contact/${resource}/${id}/`, data, configMultipart);
-    }
-    return API.put(`${resource}/${id}/`, data, configMultipart);
+  if (['team-members', 'awards', 'tech-stack'].includes(resource)) return API.put(`about/${resource}/${id}/`, data, configMultipart);
+  if (['office-addresses', 'messages', 'tickets'].includes(resource)) return API.put(`contact/${resource}/${id}/`, data, configMultipart);
+  return API.put(`${resource}/${id}/`, data, configMultipart);
 };
 
 export const deleteItem = (resource, id) => {
-    if (['team-members', 'awards', 'tech-stack'].includes(resource)) {
-        return API.delete(`about/${resource}/${id}/`);
-    }
-    if (['office-addresses', 'messages', 'tickets'].includes(resource)) {
-        return API.delete(`contact/${resource}/${id}/`);
-    }
-    return API.delete(`${resource}/${id}/`);
+  if (['team-members', 'awards', 'tech-stack'].includes(resource)) return API.delete(`about/${resource}/${id}/`);
+  if (['office-addresses', 'messages', 'tickets'].includes(resource)) return API.delete(`contact/${resource}/${id}/`);
+  return API.delete(`${resource}/${id}/`);
 };
 
-
 // ==========================================
-//  1. CMS & PAGES
+// 1. CMS & PAGES
 // ==========================================
-export const getPageContent = (page) => {
-    if (page === "home") return API.get("home-page-content/");
-    return API.get(`sitecontent/?page=${page}`);
-};
+export const getPageContent = (page) => (page === "home" ? API.get("home-page-content/") : API.get(`sitecontent/?page=${page}`));
 export const updatePageContent = (id, data) => API.put(`sitecontent/${id}/`, data);
 
 export const getHomeData = () => API.get("homepage-data/"); 
@@ -119,31 +129,26 @@ export const updateLeadSystemData = (id, data) => API.put(`lead-system-data/${id
 export const getLegalPageData = (slug) => API.get(`legal/pages/${slug}/`);
 export const updateLegalPageData = (slug, data) => API.put(`legal/pages/${slug}/`, data);
 
-
 // ==========================================
-//  2. CONTACT & TICKETS
+// 2. CONTACT & TICKETS
 // ==========================================
 export const getContactPageData = () => API.get("contact/page-data/");
 export const updateContactPageData = (id, data) => API.put(`contact/contact-content/${id}/`, data, configMultipart);
-
 export const sendContact = (data) => API.post("contact/", data);
 export const submitTicket = (data) => API.post("contact/tickets/", data);
-
 export const getContactMessages = () => API.get("contact/messages/");
 export const deleteContact = (id) => API.delete(`contact/messages/${id}/`);
-
 export const getTickets = () => API.get("contact/tickets/");
 export const updateTicket = (id, data) => API.put(`contact/tickets/${id}/`, data);
 
-
 // ==========================================
-//  3. BLOG & RESOURCES
+// 3. BLOG & RESOURCES
 // ==========================================
 export const getBlogs = (categorySlug = '', searchQuery = '') => {
-    let url = "blogs/?";
-    if (categorySlug && categorySlug !== 'all') url += `category=${categorySlug}&`; 
-    if (searchQuery) url += `search=${searchQuery}&`;
-    return API.get(url);
+  let url = "blogs/?";
+  if (categorySlug && categorySlug !== 'all') url += `category=${categorySlug}&`; 
+  if (searchQuery) url += `search=${searchQuery}&`;
+  return API.get(url);
 };
 export const getBlogBySlug = (slug) => API.get(`blogs/${slug}/`);
 export const getCategories = () => API.get("blog-categories/");
@@ -167,9 +172,8 @@ export const getResources = () => API.get("resources/");
 export const getStakeholders = () => API.get("stakeholders/");
 export const getSolutionBySlug = (slug) => API.get(`solutions/${slug}/`);
 
-
 // ==========================================
-//  4. LEADS & MARKETING
+// 4. LEADS & MARKETING
 // ==========================================
 export const submitLead = (data) => API.post("leads/", data);
 export const getLeads = () => API.get("leads/");
@@ -177,19 +181,16 @@ export const deleteLead = (id) => API.delete(`leads/${id}/`);
 export const logLeadShare = (id, data) => API.post(`leads/${id}/share/`, data);
 export const getLeadShareHistory = (id) => API.get(`leads/${id}/share-history/`);
 export const getPreviousRecipients = () => API.get(`leads/previous-recipients/`);
-
 export const getSubscribers = () => API.get("subscribers/");
 export const deleteSubscriber = (id) => API.delete(`subscribers/${id}/`);
-
 export const getEmailTemplates = () => API.get("email-templates/");
 export const createEmailTemplate = (data) => API.post("email-templates/", data);
 export const updateEmailTemplate = (id, data) => API.put(`email-templates/${id}/`, data);
 export const deleteEmailTemplate = (id) => API.delete(`email-templates/${id}/`);
 export const sendBulkEmail = (data) => API.post("subscribers/send-email/", data);
 
-
 // ==========================================
-//  5. SYSTEM SETTINGS
+// 5. SYSTEM SETTINGS
 // ==========================================
 export const getThemeSettings = () => API.get("theme-settings/"); 
 export const chatFlowHandler = (data) => API.post("chatbot-flow/", data);

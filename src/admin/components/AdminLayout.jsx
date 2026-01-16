@@ -17,11 +17,13 @@ export default function AdminLayout({ children }) {
     setOpenMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
   };
 
+  // --- UPDATED PAGES LIST ---
   const pages = [
     { name: "Home Page", slug: "home" },
     { name: "About Us", slug: "about" },
     { name: "Services", slug: "services" },
     { name: "Solutions", slug: "solutions" },
+    { name: "Lead System Page", slug: "lead-system" }, // <--- ADDED HERE
     { name: "Careers", slug: "careers" },
     { name: "Resources", slug: "resources" },
     { name: "Contact", slug: "contact" },
@@ -31,10 +33,8 @@ export default function AdminLayout({ children }) {
   // Helper for 3D Active State Styles
   const getLinkClasses = (isActive) => {
     if (isActive) {
-      // 3D Active State: White card, subtle border, colored shadow, slight lift
       return "bg-white text-blue-600 shadow-[0_4px_12px_rgba(37,99,235,0.15)] border border-blue-100/50 translate-x-1 font-bold";
     }
-    // Inactive State: Transparent, hover effect
     return "text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm hover:translate-x-0.5 border border-transparent font-medium";
   };
 
@@ -53,11 +53,11 @@ export default function AdminLayout({ children }) {
       <aside 
         className={`
           fixed inset-y-0 left-0 z-50 w-72 
-          bg-[#F9FAFB] /* Off-White Background */
+          bg-[#F9FAFB] 
           border-r border-slate-200/80
           transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 
           transition-transform duration-300 ease-in-out
-          shadow-[4px_0_24px_rgba(0,0,0,0.03)] /* 3D Depth Shadow */
+          shadow-[4px_0_24px_rgba(0,0,0,0.03)] 
           flex flex-col h-full
         `}
       >
@@ -67,7 +67,6 @@ export default function AdminLayout({ children }) {
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 drop-shadow-sm">
               XpertAI <span className="text-blue-600">Admin</span>
             </h2>
-            {/* Decorative Underline */}
             <div className="h-1 w-10 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full mt-1.5 shadow-sm"></div>
           </div>
           <button 
@@ -171,7 +170,7 @@ export default function AdminLayout({ children }) {
             <span>Subscribers</span>
           </Link>
           
-          {/* Blog Posts (Blog Manager) */}
+          {/* Blog Posts */}
            <Link 
             to="/admin/blogs" 
             className={`flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-200 text-sm ${getLinkClasses(location.pathname.startsWith('/admin/blogs'))}`}
@@ -180,11 +179,11 @@ export default function AdminLayout({ children }) {
             <span>Blog Posts</span>
           </Link>
 
-          {/* Spacer for scrolling */}
+          {/* Spacer */}
           <div className="h-4"></div>
         </nav>
 
-        {/* Footer / Logout - Stuck to Bottom */}
+        {/* Footer / Logout */}
         <div className="p-5 border-t border-slate-200 bg-[#F9FAFB] shrink-0">
           <button 
             onClick={logout}

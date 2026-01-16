@@ -5,7 +5,11 @@ import {
   ArrowUpRight, Mail, MapPin, Phone, 
   Loader2, CheckCircle, MessageSquare, Ticket, FileText 
 } from "lucide-react";
-import axios from "axios";
+// 1. Remove manual axios import
+// import axios from "axios"; 
+// 2. Import the centralized API instance
+import API from "../api"; 
+
 import { useChat } from "../context/ChatContext"; 
 
 export default function Footer({ logo }) {
@@ -19,8 +23,10 @@ export default function Footer({ logo }) {
     if (!email) return;
     setStatus("sending");
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/api/";
-      await axios.post(`${API_URL}subscribers/`, { email });
+      // 3. Use API.post instead of axios.post
+      // This automatically prepends the correct BaseURL (e.g., http://localhost:8000/api/)
+      await API.post("subscribers/", { email });
+      
       setStatus("success");
       setEmail("");
       setTimeout(() => setStatus("idle"), 3000);
@@ -63,7 +69,6 @@ export default function Footer({ logo }) {
   const otherLinks = [
     { name: "Contact Us", path: "/contact", icon: Phone },
     { name: "Live Chat", path: "#", icon: MessageSquare }, 
-    // 👇 UPDATED LINK: Added query param '?action=ticket'
     { name: "Raise a Ticket", path: "/contact?action=ticket", icon: Ticket },
     { name: "Offices Address", path: "/contact", icon: MapPin },
     { name: "View on Map", path: "https://maps.google.com", icon: ArrowUpRight, external: true },

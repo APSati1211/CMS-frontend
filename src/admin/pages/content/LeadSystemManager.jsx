@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import * as API from '../../../api';
-import { Loader2, Plus, Trash2, Layout, Save, X } from 'lucide-react';
+import * as API from '../../../api'; 
+import { 
+  Save, Plus, Trash2, Edit2, Loader2, X, Layout, 
+  Monitor, CheckCircle2 
+} from 'lucide-react';
 
 export default function LeadSystemManager() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState('main'); 
+  
+  // List State
+  const [editingItem, setEditingItem] = useState(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const res = await API.getLeadSystemData();
       setData(res.data);
@@ -17,103 +25,191 @@ export default function LeadSystemManager() {
     setLoading(false);
   };
 
-  const handleUpdate = async (e) => {
+  const handleMainContentUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     try {
-        await API.updateLeadSystemData(data?.hero?.id, formData);
-        alert("Saved!");
-        setEditing(false);
+        // Use ID 1 if not present in response
+        const id = data?.hero?.id || 1; 
+        await API.updateLeadSystemData(id, formData);
+        alert("Page Content Updated Successfully!");
         loadData();
-    } catch (err) { alert("Error saving"); }
+    } catch (err) { alert("Failed to update content."); }
   };
 
-  const handleDelete = async (id) => {
-      if(!window.confirm("Delete feature?")) return;
-      await API.deleteItem('ls-features', id);
-      loadData();
-  }
+  const handleDeleteFeature = async (id) => {
+    if(!window.confirm("Delete this feature?")) return;
+    try { await API.deleteItem('ls-features', id); loadData(); } catch (err) { alert("Failed to delete."); }
+  };
 
-  if(loading) return <div className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-blue-600"/></div>;
+  const handleSaveFeature = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+        if (editingItem) await API.updateItem('ls-features', editingItem.id, formData);
+        else await API.createItem('ls-features', formData);
+        setEditingItem(null); setIsAddingNew(false); loadData();
+    } catch (err) { alert("Failed to save feature."); }
+  };
 
-  const hero = data?.hero || {};
-  const dashboard = data?.dashboard || {};
-  const cta = data?.cta || {};
-  const features = data?.features || [];
+  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40}/></div>;
+
+  const tabs = [
+      { id: 'main', label: 'Main Content', icon: Layout },
+      { id: 'features', label: 'Features', icon: CheckCircle2 },
+  ];
 
   return (
-    <div className="space-y-8 pb-10">
-        {/* HERO & CONTENT */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
-                <h2 className="text-xl font-bold text-slate-800">Product Page Content</h2>
-                <button onClick={() => setEditing(!editing)} className="text-blue-600 font-bold hover:underline">
-                    {editing ? <X size={20}/> : "Edit Content"}
+    <div className="max-w-7xl mx-auto pb-20 p-4 md:p-6">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Lead System Manager</h1>
+        <div className="flex overflow-x-auto w-full md:w-auto gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm hide-scrollbar">
+            {tabs.map(tab => (
+                <button key={tab.id} onClick={() => { setActiveTab(tab.id); setEditingItem(null); setIsAddingNew(false); }} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition ${activeTab === tab.id ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}>
+                    <tab.icon size={16}/> {tab.label}
                 </button>
-            </div>
-            {editing ? (
-                <form onSubmit={handleUpdate} className="grid grid-cols-1 gap-6 animate-in fade-in">
+            ))}
+        </div>
+      </div>
+
+      {/* --- TAB 1: MAIN CONTENT --- */}
+      {activeTab === 'main' && (
+        <form onSubmit={handleMainContentUpdate} className="bg-white p-5 md:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-8 animate-in fade-in">
+            
+            {/* HERO SECTION */}
+            <div className="space-y-4">
+                <h3 className="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><Layout size={18} className="text-blue-500"/> Hero Section</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hero Section</label>
-                        <input name="hero_title" defaultValue={hero.title} className="w-full border p-2 rounded-lg mb-2"/>
-                        <textarea name="hero_subtitle" defaultValue={hero.subtitle} className="w-full border p-2 rounded-lg"/>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Page Title</label>
+                        <textarea name="hero_title" defaultValue={data?.hero?.title} className="w-full border p-3 rounded-xl font-bold text-slate-800 focus:border-blue-500 outline-none" rows="2" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Subtitle</label>
+                        <textarea name="hero_subtitle" defaultValue={data?.hero?.subtitle} className="w-full border p-3 rounded-xl text-slate-600 focus:border-blue-500 outline-none" rows="3" />
+                    </div>
+                </div>
+            </div>
+
+            {/* DASHBOARD PREVIEW */}
+            <div className="space-y-4">
+                <h3 className="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><Monitor size={18} className="text-purple-500"/> Dashboard Preview</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Image Alt / Placeholder Text</label>
+                        <input name="dashboard_placeholder" defaultValue={data?.dashboard?.placeholder_text} className="w-full border p-3 rounded-xl focus:border-purple-500 outline-none" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Upload New Image</label>
+                        <input type="file" name="dashboard_image" className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 transition"/>
+                        {data?.dashboard?.image && (
+                            <div className="mt-3 p-2 bg-slate-50 rounded-xl border w-fit">
+                                <img src={data.dashboard.image} alt="Preview" className="h-20 rounded-lg object-cover"/>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* CTA SECTION */}
+            <div className="space-y-4">
+                <h3 className="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500"/> Bottom CTA</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">CTA Title</label>
+                        <input name="cta_title" defaultValue={data?.cta?.title} className="w-full border p-3 rounded-xl font-bold focus:border-emerald-500 outline-none" />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">CTA Description</label>
+                        <textarea name="cta_text" defaultValue={data?.cta?.text} className="w-full border p-3 rounded-xl focus:border-emerald-500 outline-none" rows="2"/>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" className="w-full md:w-auto bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition flex justify-center items-center gap-2">
+                <Save size={20}/> Save All Changes
+            </button>
+        </form>
+      )}
+
+      {/* --- TAB 2: FEATURES LIST --- */}
+      {activeTab === 'features' && (
+        <div className="space-y-6 animate-in fade-in">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    System Features <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs border">{data?.features?.length || 0}</span>
+                </h2>
+                {!isAddingNew && !editingItem && (
+                    <button onClick={() => setIsAddingNew(true)} className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-md">
+                        <Plus size={18}/> Add Feature
+                    </button>
+                )}
+            </div>
+
+            {/* EDITOR FORM */}
+            {(isAddingNew || editingItem) && (
+                <form onSubmit={handleSaveFeature} className="bg-slate-50 p-5 rounded-2xl border border-blue-200 shadow-sm mb-6 relative">
+                    <button type="button" onClick={() => { setEditingItem(null); setIsAddingNew(false); }} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><X size={20}/></button>
+                    <h3 className="font-bold text-blue-700 mb-4">{editingItem ? 'Edit Feature' : 'New Feature'}</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Feature Title</label>
+                            <input name="title" defaultValue={editingItem?.title} className="w-full border p-3 rounded-xl bg-white focus:border-blue-500 outline-none" required />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Icon Name (Lucide)</label>
+                            <input name="icon_name" defaultValue={editingItem?.icon_name || 'CheckCircle'} className="w-full border p-3 rounded-xl bg-white focus:border-blue-500 outline-none" />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
+                            <textarea name="description" defaultValue={editingItem?.description} className="w-full border p-3 rounded-xl bg-white focus:border-blue-500 outline-none" rows="2" required />
+                        </div>
                     </div>
                     
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Dashboard Preview</label>
-                        <input name="dashboard_placeholder" defaultValue={dashboard.placeholder_text} className="w-full border p-2 rounded-lg mb-2" placeholder="Image Alt Text"/>
-                        <input type="file" name="dashboard_image" className="block w-full text-sm text-slate-500 file:bg-blue-50 file:border-0 file:rounded-full file:px-4 file:py-1 file:text-blue-700"/>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button type="button" onClick={() => { setEditingItem(null); setIsAddingNew(false); }} className="px-4 py-2 text-slate-600 font-bold bg-white border rounded-lg hover:bg-slate-50">Cancel</button>
+                        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 shadow-sm">Save Feature</button>
                     </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">CTA Section</label>
-                        <input name="cta_title" defaultValue={cta.title} className="w-full border p-2 rounded-lg mb-2"/>
-                        <textarea name="cta_text" defaultValue={cta.text} className="w-full border p-2 rounded-lg"/>
-                    </div>
-
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg w-fit flex items-center gap-2">
-                        <Save size={16}/> Save Changes
-                    </button>
                 </form>
-            ) : (
-                <div className="text-sm space-y-3 text-slate-600">
-                    <p><span className="font-bold text-slate-800">Hero:</span> {hero.title}</p>
-                    {dashboard.image && (
-                        <div className="mt-2">
-                            <span className="font-bold text-slate-800 block mb-1">Dashboard Image:</span>
-                            <img src={dashboard.image} alt="Dashboard" className="h-24 rounded border bg-slate-50"/>
-                        </div>
-                    )}
-                </div>
             )}
-        </div>
 
-        {/* FEATURES LIST */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h3 className="font-bold mb-4 flex justify-between items-center text-slate-800">
-                System Features 
-                <button className="text-blue-600 hover:bg-blue-50 p-1 rounded"><Plus size={20}/></button>
-            </h3>
-            <div className="space-y-2">
-                {features.map(f => (
-                    <div key={f.id} className="flex justify-between items-center border-b last:border-0 py-3 px-2 hover:bg-slate-50 transition rounded-lg">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-                                <Layout size={20}/>
+            {/* LIST */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {data?.features?.map(feature => (
+                    <div key={feature.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+                        <div>
+                            <div className="flex justify-between items-start mb-3">
+                                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 border border-blue-100 font-bold">
+                                    {feature.icon_name ? feature.icon_name.slice(0,2) : <CheckCircle2 size={20}/>}
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-bold text-sm text-slate-800">{f.title}</p>
-                                <p className="text-xs text-slate-500">{f.description}</p>
-                            </div>
+                            <h4 className="font-bold text-slate-800 text-lg mb-1">{feature.title}</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">{feature.description}</p>
                         </div>
-                        <button onClick={() => handleDelete(f.id)} className="text-slate-300 hover:text-red-500 p-2">
-                            <Trash2 size={18}/>
-                        </button>
+                        
+                        <div className="flex gap-2 mt-5 pt-4 border-t border-slate-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setEditingItem(feature); setIsAddingNew(false); window.scrollTo({top:0, behavior:'smooth'}); }} className="flex-1 bg-indigo-50 text-indigo-600 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 flex items-center justify-center gap-1">
+                                <Edit2 size={14}/> Edit
+                            </button>
+                            <button onClick={() => handleDeleteFeature(feature.id)} className="flex-1 bg-red-50 text-red-600 py-2 rounded-lg text-xs font-bold hover:bg-red-100 flex items-center justify-center gap-1">
+                                <Trash2 size={14}/> Delete
+                            </button>
+                        </div>
                     </div>
                 ))}
-                {features.length === 0 && <p className="text-sm text-slate-400">No features added.</p>}
+                
+                {data?.features?.length === 0 && (
+                    <div className="col-span-full py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400">
+                        <p>No features added yet. Click "Add Feature" to start.</p>
+                    </div>
+                )}
             </div>
         </div>
+      )}
+
     </div>
   );
 }
